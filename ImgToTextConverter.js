@@ -20,7 +20,7 @@ class ImgToTextConverter {
     //blue: (63, 72, 204, 1)
     //yellow: (255, 242, 0, 1)
 
-    convertToText(pxGroupingSize=2) {
+    convertToText(pxGroupingSize=4) {
         let width = this._canvas.width, height = this._canvas.height, data = this._ctx.getImageData(0, 0, width, height).data,
             x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize**2)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize,
             bigPixels = []
@@ -47,10 +47,10 @@ class ImgToTextConverter {
                         }
                         atI = ((((atY/pxGroupingSize)/height)*bigPxCountY)*pxGroupingCount*bigPxCountX)+((((atX/pxGroupingSize)/width)*bigPxCountX)*pxGroupingSize*4)+i+adjust
                         
-                        if (i%(pxGroupingSize) >= pxGroupingSize+overflow) bigPx.push([null, null, null])
+                        if ((i/4)%(pxGroupingSize) >= pxGroupingSize+overflow) bigPx.push([null, null, null])
                         else bigPx.push([data[atI], data[atI+1], data[atI+2]])
 
-                       console.log("v: ", data[atI], data[atI+1], data[atI+2], data[atI+3], "|", atX, atY, "|", atI, i/4)
+                       console.log("v: ", data[atI], data[atI+1], data[atI+2], data[atI+3], "|", atX, atY, "|", atI, i/4, overflow, i%(pxGroupingSize) >= pxGroupingSize+overflow,)
                     }
                     bigPixels.push(bigPx)
 
