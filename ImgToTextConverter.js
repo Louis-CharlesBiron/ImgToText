@@ -13,30 +13,47 @@ class ImgToTextConverter {
         this._ctx.drawImage(imgElement, 0, 0)
     }
 
+    //red: (236, 28, 36, 1)
+    //black: (24, 24, 24, 1)
+    //grey: (195, 195, 195, 1)
+    //pink: (184, 61, 186, 1)
+    //blue: (63, 72, 204, 1)
+    //yellow: (255, 242, 0, 1)
 
-    convertToText(pxGroupingSize=4) {
+    convertToText(pxGroupingSize=5) {
         let width = this._canvas.width, height = this._canvas.height, data = this._ctx.getImageData(0, 0, width, height).data,
-            x, y, atY, atX, pxSpacing = 4*width*pxGroupingSize, pxGroupCount = pxGroupingSize**2
+            x, y, atY, atX, atI, pxSpacing = pxGroupingSize, pxGroupingCount = (pxGroupingSize**2)*4, bigPxCountX = (width/pxGroupingSize)>>0, bigPxCountY = (height/pxGroupingSize)>>0,
+            bigPixels = []
 
-            console.log("total px:", height*width)
+            console.log("total px:", height*width/pxGroupingSize, "("+height*width+")", width, height, bigPxCountX, bigPxCountY)
 
             for (y=0;y<height;y+=pxGroupingSize) {
                 atY = y*pxSpacing
+                console.log("---", atY, height, width, pxGroupingSize)
                 for (x=0;x<width;x+=pxGroupingSize) {
-                    atX = atY+x*4*pxGroupingSize
-                    console.log(atX, atY)
+                    atX = x*pxGroupingSize
 
-                    for (let i=0;i<pxGroupCount;i++) {
+                    console.log("("+atX+", "+atY+")")
+                    let bigPx = []
+                    for (let i=0,adjust=0;i<pxGroupingCount;i+=4) {
 
+                        if (!((i/4)%pxGroupingSize)&&i) {
+                            adjust = i
+                            console.log("ADJUST =", adjust, atX, atY)
+                        }
+                        
+                        atI = (atY*8)+((((atX/pxGroupingSize)/width)*bigPxCountX)*pxGroupingSize*4)+i+adjust
+                        bigPx.push([data[atI], data[atI+1], data[atI+2]])
+
+
+                       console.log("Big Pixel: ", data[atI], data[atI+1], data[atI+2], data[atI+3], "|", atX, atY, "|", atI, ((atX/pxGroupingSize)/width)*bigPxCountX)
                     }
+                    bigPixels.push(bigPx)
 
-
-
-                    //return [x, y]
-                }
             }
+        }
 
-        return ""
+        return bigPixels
     }
 
 }

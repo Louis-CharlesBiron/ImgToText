@@ -4,7 +4,9 @@ const converter = new ImgToTextConverter()
 function convertNewImg(img) {
     converter.loadImg(img)
 
-    converter.convertToText()
+    console.log(
+        converter.convertToText()
+    )
 
 }
 
