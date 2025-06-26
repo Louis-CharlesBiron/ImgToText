@@ -20,37 +20,37 @@ class ImgToTextConverter {
     //blue: (63, 72, 204, 1)
     //yellow: (255, 242, 0, 1)
 
-    convertToText(pxGroupingSize=4) {
+    convertToText(pxGroupingSize=5) {
         let width = this._canvas.width, height = this._canvas.height, data = this._ctx.getImageData(0, 0, width, height).data,
             x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize**2)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize,
             bigPixels = []
 
-            console.log("total px:", height*width/pxGroupingSize, "("+height*width+")", width, height, bigPxCountX, bigPxCountY)
+            //console.log("total px:", height*width/pxGroupingSize, "("+height*width+")", width, height, bigPxCountX, bigPxCountY)
 
             for (y=0;y<height;y+=pxGroupingSize) {
                 atY = y*pxGroupingSize
-                console.log("---", atY, height, width, pxGroupingSize)
+                //console.log("---", atY, height, width, pxGroupingSize)
                 for (x=0;x<width;x+=pxGroupingSize) {
                     atX = x*pxGroupingSize
 
                     const overflow = width-(x+pxGroupingSize)
 
-                    console.log("OVERFLOW", overflow)
+                    //console.log("OVERFLOW", overflow)
 
-                    console.log("NEW BIG PIXEL ↓ ("+atX+", "+atY+")")
+                    //console.log("NEW BIG PIXEL ↓ ("+atX+", "+atY+")")
                     let bigPx = []
                     for (let i=0,adjust=0;i<pxGroupingCount;i+=4) {
 
                         if (!((i/4)%pxGroupingSize)&&i) {
-                            adjust = (width*4)-i
-                            console.log("line: ", adjust, atX, atY, i)
+                            adjust = (width*4)*((i/pxGroupingCount)*pxGroupingSize)-i
+                            //console.log("line: ", adjust, i, i/4, ((i/pxGroupingCount)*4))
                         }
                         atI = ((((atY/pxGroupingSize)/height)*bigPxCountY)*pxGroupingCount*bigPxCountX)+((((atX/pxGroupingSize)/width)*bigPxCountX)*pxGroupingSize*4)+i+adjust
                         
                         if ((i/4)%(pxGroupingSize) >= pxGroupingSize+overflow) bigPx.push([null, null, null])
                         else bigPx.push([data[atI], data[atI+1], data[atI+2]])
 
-                       console.log("v: ", data[atI], data[atI+1], data[atI+2], data[atI+3], "|", atX, atY, "|", atI, i/4, overflow, i%(pxGroupingSize) >= pxGroupingSize+overflow,)
+                       //console.log("v: ", data[atI], data[atI+1], data[atI+2], data[atI+3], "|", atX, atY, "|", atI, overflow, (i/4)%(pxGroupingSize) >= pxGroupingSize+overflow, ((((atY/pxGroupingSize)/height)*bigPxCountY)*pxGroupingCount*bigPxCountX))
                     }
                     bigPixels.push(bigPx)
 
