@@ -4,9 +4,18 @@ const converter = new ImgToTextConverter()
 function convertNewImg(img) {
     converter.loadImg(img)
 
-    console.log(
-        converter.convertToText()
-    )
+    setTimeout(()=>{///todo
+        const res1 = converter.mapPixels(),
+        res2 = converter.convertToText(res1)
+
+        console.log(
+            res1//, res2
+        )
+
+        showGeneratedText.value = res2
+    },250)
+
+
 
 }
 

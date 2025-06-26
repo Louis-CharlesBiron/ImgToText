@@ -36,3 +36,13 @@ html, body {
     align-items: center;
     justify-content: space-evenly;
 }
+
+#showGeneratedText {
+    padding: 20px;
+    height: 100%;
+    width: 100%;
+    background-color: transparent;
+    color: aliceblue;
+    outline: none;
+    border: none;
+}
