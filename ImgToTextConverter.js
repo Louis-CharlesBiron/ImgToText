@@ -1,20 +1,45 @@
 
 class ImgToTextConverter {
-    static DEFAULT_CHARACTER_SET = " .:-~=+oOXHMB8$W%@#░▒▓█"
+    static DEFAULT_CHARACTER_SETS = {
+        VERY_LOW:" .:",
+        DOTS:" .·':",
+        LOW:" .:-~=+oOXHM",// 13 shades
+        LOW_REVERSED:"MHXOo+=~-:. ",
+        MIDDLE:" .:-~=+oOXHMB8$W%@#░▒▓█", // 23 shades,
+        HIGH_RANGE:" ˙.·';:,-^~=+coOXHMB8$W%@#░▒▓█",// 30 shades
+        HIGH_CENTRAL_SHADING:"MWVXvuo+;:-`. .`-:;+ouvXVMW",
+        HIGH_CENTRAL_SHADING_REVERSED:" .,:;~-+=oO0BDWM#@█@#MWDB0Oo=+-~;:,. "
+    }
+    static DEFAULT_CHARACTER_SET = ImgToTextConverter.DEFAULT_CHARACTER_SETS.LOW
 
-    constructor() {
-        
+    constructor(htmlCanvas, resultCB, pxGroupingSize=5, refreshRate=0) {
+        this._CVS = new Canvas(htmlCanvas, ()=>{
+            if (this._media?.initialized) {
+                const mappingResults = this.#mapPixels(this._pxGroupingSize), textResult = this.#getText(mappingResults, this._charSet)
+                this._resultCB(textResult)
+            } else if (this._media) setTimeout(()=>this._CVS.loopingCB(),100)
+        }, refreshRate, null, null, null, true)
+
+        this._resultCB = resultCB
+        this._pxGroupingSize = pxGroupingSize||5
+        this._charSet = ImgToTextConverter.DEFAULT_CHARACTER_SET
+        this._media = null
     }
 
-    loadImg(imgElement, resolution=null) {
-        resolution||=[imgElement.width, imgElement.height]
-        this._canvas = new OffscreenCanvas(resolution[0], resolution[1])
-        this._ctx = this._canvas.getContext("2d")
-        this._ctx.drawImage(imgElement, 0, 0)
+    loadMedia(mediaSource, size=null, readyCB=null, errorCB=null) {
+        const isStatic = this._CVS.fpsLimit=="static"
+        this._media = new ImageDisplay(mediaSource, [0,0], size, errorCB, ()=>{
+            if (isStatic) this._CVS.draw()
+            if (readyCB) readyCB(this)
+        }, null, null, true)
+        this._CVS.add(this._media)
+
+        if (isStatic) this._CVS.initializeStatic()
+        else this._CVS.start()
     }
 
-    mapPixels(pxGroupingSize=5, getRaw=false) {
-        let width = this._canvas.width, height = this._canvas.height, data = this._ctx.getImageData(0, 0, width, height).data,
+    #mapPixels(pxGroupingSize=5, getRaw=false) {
+        let CVS = this._CVS, media = this._media, width = media.width>>0, height = media.height>>0, data = CVS.ctx.getImageData(0, 0, width, height).data,
             x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize**2)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, bigPixels = [], ceil = Math.ceil
 
             for (y=0;y<height;y+=pxGroupingSize) {
@@ -29,7 +54,7 @@ class ImgToTextConverter {
 
                         const r = data[atI], g = data[atI+1], b = data[atI+2]
                         if (getRaw) bigPx.push((i/4)%(pxGroupingSize) >= pxGroupingSize+overflow ? [null, null, null] : [r, g, b])
-                        else bigPx.push(((i/4)%(pxGroupingSize) >= pxGroupingSize+overflow || r==null || g==null || b==null) ? null : (r+g+b)/3)
+                        else bigPx.push((r==null || g==null || b==null || (i/4)%(pxGroupingSize) >= pxGroupingSize+overflow) ? null : (r+g+b)/3)
                     }
 
                     if (getRaw) bigPixels.push(bigPx)
@@ -40,7 +65,7 @@ class ImgToTextConverter {
                             if (pxAvg==null) nullCount++
                             else total+=pxAvg
                         }
-                        bigPixels.push({x, y, pxGroupingSize, avg:total/(b_ll-nullCount)})
+                        bigPixels.push({x, y, pxGroupingSize, avg:total/(b_ll-nullCount)||0})
                     }
                 }
             }
@@ -48,9 +73,9 @@ class ImgToTextConverter {
         return bigPixels
     }
 
-    convertToText(pixelMappingResults, chars=ImgToTextConverter.DEFAULT_CHARACTER_SET) {
-        const range = [0], c_ll = chars.length, range_ll = 255/c_ll, p_ll = pixelMappingResults.length
-        for (let i=1;i<range_ll;i++) range[i] = range[i-1]+c_ll
+    #getText(pixelMappingResults, chars) {
+        const range = [0], c_ll = chars.length, rangeDivision = 255/c_ll, p_ll = pixelMappingResults.length
+        for (let i=1;i<c_ll;i++) range[i] = range[i-1]+rangeDivision
 
         let textResults = "", lastY=0
         for (let i=0;i<p_ll;i++) {

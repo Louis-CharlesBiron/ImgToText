@@ -11,7 +11,7 @@
     <div class="sections">
 
         <div class="section">
-            <img alt="No image specified!" id="imgPreview">
+            <canvas id="imgInputDisplay"></canvas>
         </div>
 
         <div class="section">
@@ -21,12 +21,57 @@
     </div>
 
     <div class="settings">
-        <input type="file" id="imgInput">
-        <input type="text" value="0BOKkoeci,. " id="charsInput">
-        <button id="generateBtn">Generate</button>
+        
+
+        <div class="inputSettings">
+            <button id="camBtn">Camera</button>
+            <button id="screenBtn">Screen</button>
+            <input type="file" id="imgInput">
+        </div>
+
+
+        <div class="charsInputParent">
+            Characters:
+            <input type="text" value="TODO" id="charsInput">
+            <select id="defaultChars">
+
+            </select>
+        </div>
+
+
+        <div class="sliders">
+            <div class="blockSetting">
+                <span class="tip">Pixel Grouping Size :</span>
+                <input type="range" value="5" id="pxGroupingSlider" min="1" max="15" step="1">
+                <input type="number" id="manualPxGrouping" value="5" class="smallInput">
+                <span id="pxGroupingValue" class="settingValuePreview">x5</span>
+            </div>
+
+            <div class="blockSetting">
+                <span class="tip">Letter Spacing :</span>
+                <input type="range" value="1" id="letterSpacingSlider" min="-2" max="10" step="0.5">
+                <input type="number" id="manualLetterSpacing" value="1" class="smallInput">
+                <span id="letterSpacingValue" class="settingValuePreview"> 1</span>
+            </div>
+
+            <div class="blockSetting">
+                <span class="tip">Line height :</span>
+                <input type="range" value="10" id="lineHeightSlider" min="1" max="20" step="0.5">
+                <input type="number" id="manualLineHeight" value="10" class="smallInput">
+                <span id="lineHeightValue" class="settingValuePreview"> 10</span>
+            </div>
+            <div class="blockSetting">
+                <span class="tip">Font size :</span>
+                <input type="range" value="16" id="fontSizeSlider" min="1" max="48" step="0.5">
+                <input type="number" id="manualFontSize" value="16" class="smallInput">
+                <span id="fontSizeValue" class="settingValuePreview"> 16</span>
+            </div>
+        </div>
+ 
 
     </div>
 
+    <script src="canvasDotEffect.js"></script>
     <script src="ImgToTextConverter.js"></script>
     <script src="index.js" async></script>
 </body>
