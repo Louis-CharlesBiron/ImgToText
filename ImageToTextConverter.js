@@ -1,5 +1,5 @@
 
-class ImgToTextConverter {
+class ImageToTextConverter {
     static DEFAULT_CHARACTER_SETS = {
         VERY_LOW:[..." .:"],
         DOTS:[..." .·':"],
@@ -10,33 +10,54 @@ class ImgToTextConverter {
         HIGH_RANGE:[..." ˙.·';:,-^~=+coOXHMB8$W%@#░▒▓█"],// 30 shades
         HIGH_CENTRAL_SHADING:[..."MWVXvuo+;:-`. .`-:;+ouvXVMW"],
         HIGH_CENTRAL_SHADING_REVERSED:[..." .,:;~-+=oO0BDWM#@█@#MWDB0Oo=+-~;:,. "],
+        TEST_ASCII:["░","▒","▓","█"],
+        TEST_ASCII2:[" ","░","▒","▓","█"],
     }
-    static DEFAULT_CHARACTER_SET = ImgToTextConverter.DEFAULT_CHARACTER_SETS.LOW
+    static DEFAULT_CHARACTER_SET = ImageToTextConverter.DEFAULT_CHARACTER_SETS.LOW
+    static DEFAULT_CVS_SIZE = [...ImageDisplay.RESOLUTIONS.SD]
+    static DEFAULT_MEDIA_SIZE = ["90%", "45%"]
 
-    constructor(htmlCanvas, resultCB, pxGroupingSize=5, refreshRate=0) {
-        this._CVS = new Canvas(htmlCanvas, ()=>{
-            if (this._media?.initialized) {
-                const mappingResults = this.#mapPixels(this._pxGroupingSize), textResult = this.#getText(mappingResults, this._charSet)
-                this._resultCB(textResult)
-            } else if (this._media) setTimeout(()=>this._CVS.loopingCB(),100)
-        }, refreshRate, null, null, null, true)
-
+    constructor(resultCB, size=ImageToTextConverter.DEFAULT_CVS_SIZE, pxGroupingSize=5, maxRefreshRate=30) {
+        this._CVS = this.#createCVS(size, maxRefreshRate)
         this._resultCB = resultCB
         this._pxGroupingSize = pxGroupingSize||5
-        this._charSet = ImgToTextConverter.DEFAULT_CHARACTER_SET
+        this._charSet = ImageToTextConverter.DEFAULT_CHARACTER_SET
         this._media = null
     }
 
-    loadMedia(mediaSource, size=null, readyCB=null, errorCB=null) {
-        const isStatic = this._CVS.fpsLimit=="static"
+    /**
+     * Creates the CDE Canvas instance used for convertions
+     * @param {[width, height] | Canvas | HTMLCanvasElement | OffscreenCanvas} sizeOrCanvas: Either a size array or any type of canvas 
+     * @param {Number?} maxRefreshRate: The maximum framerate at which convertion will occur. (useful for dynamic convertions, such as videos) 
+     * @returns A CDE Canvas instance
+     */
+    #createCVS(sizeOrCanvas, maxRefreshRate) {
+        let canvas = null
+        if (Array.isArray(sizeOrCanvas)) canvas = new OffscreenCanvas(sizeOrCanvas[0], sizeOrCanvas[1])
+        else if (sizeOrCanvas instanceof Canvas) canvas = sizeOrCanvas.cvs
+        else if (sizeOrCanvas instanceof HTMLCanvasElement || sizeOrCanvas instanceof OffscreenCanvas) canvas = sizeOrCanvas
+        else canvas = new OffscreenCanvas(...ImageToTextConverter.DEFAULT_CVS_SIZE)
+
+        const CVS = new Canvas(canvas, ()=>{
+            if (this._media?.initialized) {
+                const mappingResults = this.#mapPixels(this._pxGroupingSize), textResult = this.#getText(mappingResults, this._charSet)
+                this._resultCB(textResult)
+            }// else if (this._media) setTimeout(()=>this._CVS.loopingCB(),100)
+        }, maxRefreshRate, null, null, null, true)
+
+        CVS.start()
+        return CVS
+    }
+
+    loadMedia(mediaSource, size=ImageToTextConverter.DEFAULT_MEDIA_SIZE, readyCB=null, errorCB=null) {
+        //TODO
+        const isStatic = this.fpsLimit=="static"
         this._media = new ImageDisplay(mediaSource, [0,0], size, errorCB, ()=>{
             if (isStatic) this._CVS.draw()
-            if (readyCB) readyCB(this)
+            if (CDEUtils.isFunction(readyCB)) readyCB(this)
         }, null, null, true)
-        this._CVS.add(this._media)
 
-        if (isStatic) this._CVS.initializeStatic()
-        else this._CVS.start()
+        this._CVS.add(this._media)
     }
 
     #mapPixels(pxGroupingSize=5) {
@@ -71,11 +92,9 @@ class ImgToTextConverter {
     }
 
     #getText(pixelMappingResults, chars) {
-        const range = [0], c_ll = chars.length, rangeDivision = 255/c_ll, p_ll = pixelMappingResults.length
+        let range = [0], c_ll = chars.length, rangeDivision = 255/c_ll, p_ll = pixelMappingResults.length, textResults = "", lastY=0
         for (let i=1;i<c_ll;i++) range[i] = range[i-1]+rangeDivision
 
-
-        let textResults = "", lastY=0
         for (let i=0;i<p_ll;i++) {
             let bigPx = pixelMappingResults[i], y = bigPx.y, avg = bigPx.avg, atValue = -1, charIndex = 0
 
@@ -95,8 +114,37 @@ class ImgToTextConverter {
         return textResults
     }
 
+    createHTMLFileInput(id, onInputCB) {
+        const usesOldInput = id instanceof HTMLInputElement, input = usesOldInput ? id : document.createElement("input")
+        input.type = "file"
+        if (id && !usesOldInput) input.id = id
+        input.accept = ImageDisplay.getSupportedHTMLAccept()
+        input.oninput=()=>{
+            const file = imgInput.files[0]
+            if (CDEUtils.isFunction(onInputCB)) onInputCB(file, this)
+            if (file) {
+                if (ImageDisplay.isVideoFormatSupported(file)) this.loadMedia(ImageDisplay.loadVideo(file))
+                else if (ImageDisplay.isImageFormatSupported(file)) {
+                    const fileReader = new FileReader()
+                    fileReader.onload=e=>this.loadMedia(ImageDisplay.loadImage(e.target.result))
+                    fileReader.readAsDataURL(file)
+                }
+            }
+        }
+        return input
+    }
+
+    generate() {
+        this._CVS.drawSingleFrame()
+    }
+
+    clear() {
+        this._CVS.removeAllObjects()
+    }
+
     /**
-        getBestRsolution()
+    TODO
+        getBestResolution()
 
         ---GIVEN---
         - letterSpacing (0px)
@@ -108,12 +156,23 @@ class ImgToTextConverter {
         - media height
 
         (MAYBE) a max width/height
-    
-    
-    
+
+
+
+        return the best version of the convertion
     */
 
-
-
+    get CVS() {
+        return this._CVS
+    }
+    get cvs() {
+        return this._CVS.cvs
+    }
+    get size() {
+        return this._CVS.size
+    }
+    get fpsLimit() {
+        return this._CVS.fpsLimit
+    }
 
 }

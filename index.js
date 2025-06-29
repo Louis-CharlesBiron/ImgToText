@@ -1,45 +1,17 @@
 
-const converter = new ImgToTextConverter(document.getElementById("imgInputDisplay"), (text)=>showGeneratedText.value=text, 5, 0)
+const converter = new ImageToTextConverter((text)=>showGeneratedText.value=text, document.getElementById("imgInputDisplay"), 5)
 
 // FILE INPUT
-imgInput.oninput=()=>{
-    const file = imgInput.files[0]
-    if (file) {
-        if (file.name.endsWith(".mp4") || file.name.endsWith(".mov")) {
-            const video = document.createElement("video"), url = URL.createObjectURL(file)
-            video.src = url
-            video.loop = true
-            video.play()
-            converter.loadMedia(video, ["90%", "45%"])
-
-            converter._CVS.fpsLimit = 30
-            converter._CVS.start()
-        } else {
-            const fileReader = new FileReader()
-            fileReader.onload=e=>{
-                const img = new Image()
-                img.src = e.target.result
-                converter.loadMedia(img, ["90%", "45%"])
-            }
-            fileReader.readAsDataURL(file)
-        }
-    }
-}
-
-let a = true
+converter.createHTMLFileInput(imgInput)
 
 // CAMERA CAPTURE INPUT
 camBtn.onclick=()=>{
-    converter.loadMedia(ImageDisplay.loadCamera(), ["90%", "45%"])
-    converter._CVS.fpsLimit = 30
-    converter._CVS.start()
+    converter.loadMedia(ImageDisplay.loadCamera())
 }
 
 // SCREEN CAPTURE INPUT
 screenBtn.onclick=()=>{
-    converter.loadMedia(ImageDisplay.loadCapture(), ["90%", "45%"])
-    converter._CVS.fpsLimit = 30
-    converter._CVS.start()
+    converter.loadMedia(ImageDisplay.loadCapture())
 }
 
 
@@ -47,7 +19,7 @@ screenBtn.onclick=()=>{
 const settingsBlocks = [
     [pxGroupingSlider, manualPxGrouping, pxGroupingValue, (value)=>{
         converter._pxGroupingSize = value
-        converter._CVS.drawSingleFrame()
+        converter.generate()
         return "x"+value
     }],
     [letterSpacingSlider, manualLetterSpacing, letterSpacingValue, (value)=>{showGeneratedText.style.letterSpacing = value+"px"}],
@@ -55,13 +27,12 @@ const settingsBlocks = [
     [fontSizeSlider, manualFontSize, fontSizeValue, (value)=>{showGeneratedText.style.fontSize = value+"px"}],
     [widthSlider, manualWidth, widthValue, (value)=>{
         converter._media.size = [value+"%", converter._media.size[1]]
-        converter._CVS
-        converter._CVS.drawSingleFrame()
+        converter.generate()
         return value+"%"
     }],
     [heightSlider, manualHeight, heightValue, (value)=>{
         converter._media.size = [converter._media.size[0], value+"%"]
-        converter._CVS.drawSingleFrame()
+        converter.generate()
         return value+"%"
     }]
 ]
@@ -85,25 +56,21 @@ settingsBlocks.forEach((els)=>{
 //charsInput.value = converter._charSet
 //charsInput.oninput=e=>{
 //    converter._charSet = e.target.value
-//    converter._CVS.drawSingleFrame()
+//    converter.generate()
 //}
 
-Object.entries(ImgToTextConverter.DEFAULT_CHARACTER_SETS).forEach(([name, chars])=>{
+Object.entries(ImageToTextConverter.DEFAULT_CHARACTER_SETS).forEach(([name, chars])=>{
     const option = document.createElement("option")
     option.textContent = name
     option.value = chars
-
     defaultChars.appendChild(option)
 })
 
-defaultChars.value = ImgToTextConverter.DEFAULT_CHARACTER_SET
+defaultChars.value = ImageToTextConverter.DEFAULT_CHARACTER_SET
 defaultChars.oninput=e=>{
-    //charsInput.value = 
     converter._charSet = e.target.value.split(",")
-    converter._CVS.drawSingleFrame()
+    converter.generate()
 }
-
-
 
 copyBtn.onclick=()=>{
         if (navigator.clipboard) navigator.clipboard.writeText(showGeneratedText.value.trim())
