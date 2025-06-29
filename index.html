@@ -27,16 +27,32 @@
             <button id="camBtn">Camera</button>
             <button id="screenBtn">Screen</button>
             <input type="file" id="imgInput">
+                    <div class="sliders">
+            <div class="blockSetting">
+                <span class="tip">Media source width :</span>
+                <input type="range" value="90" id="widthSlider" min="1" max="100" step="1">
+                <input type="number" id="manualWidth" value="90" class="smallInput">
+                <span id="widthValue" class="settingValuePreview"> 90%</span>
+            </div>
+            <div class="blockSetting">
+                <span class="tip">Media source height :</span>
+                <input type="range" value="45" id="heightSlider" min="1" max="100" step="1">
+                <input type="number" id="manualHeight" value="45" class="smallInput">
+                <span id="heightValue" class="settingValuePreview"> 45%</span>
+            </div>
+        </div>
         </div>
 
 
         <div class="charsInputParent">
             Characters:
-            <input type="text" value="TODO" id="charsInput">
+            <!-- <input type="text" id="charsInput"> -->
             <select id="defaultChars">
 
             </select>
         </div>
+
+        <button id="copyBtn">Copy Text Result</button>
 
 
         <div class="sliders">

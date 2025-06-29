@@ -1,4 +1,0 @@
-- get image into canvas
-- loop through image at provided resolution
-- get avg of resolution defined pixel
-- map it to text
