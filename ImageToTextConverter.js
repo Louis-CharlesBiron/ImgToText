@@ -17,12 +17,13 @@ class ImageToTextConverter {
     static DEFAULT_CVS_SIZE = [...ImageDisplay.RESOLUTIONS.SD]
     static DEFAULT_MEDIA_SIZE = ["90%", "45%"]
 
-    constructor(resultCB, size=ImageToTextConverter.DEFAULT_CVS_SIZE, pxGroupingSize=5, maxRefreshRate=30) {
-        this._CVS = this.#createCVS(size, maxRefreshRate)
+    constructor(resultCB, sourceMedia, maxImageInputSize=ImageToTextConverter.DEFAULT_CVS_SIZE, pxGroupingSize=5, charSet, maxRefreshRate=30) {
+        this._CVS = this.#createCVS(maxImageInputSize, maxRefreshRate)
         this._resultCB = resultCB
         this._pxGroupingSize = pxGroupingSize||5
-        this._charSet = ImageToTextConverter.DEFAULT_CHARACTER_SET
+        this._charSet = charSet??ImageToTextConverter.DEFAULT_CHARACTER_SET
         this._media = null
+        if (sourceMedia) this.loadMedia(sourceMedia)
     }
 
     /**
@@ -42,18 +43,24 @@ class ImageToTextConverter {
             if (this._media?.initialized) {
                 const mappingResults = this.#mapPixels(this._pxGroupingSize), textResult = this.#getText(mappingResults, this._charSet)
                 this._resultCB(textResult)
-            }// else if (this._media) setTimeout(()=>this._CVS.loopingCB(),100)
+            }
         }, maxRefreshRate, null, null, null, true)
 
-        CVS.start()
         return CVS
     }
 
-    loadMedia(mediaSource, size=ImageToTextConverter.DEFAULT_MEDIA_SIZE, readyCB=null, errorCB=null) {
-        //TODO
-        const isStatic = this.fpsLimit=="static"
-        this._media = new ImageDisplay(mediaSource, [0,0], size, errorCB, ()=>{
-            if (isStatic) this._CVS.draw()
+    loadMedia(sourceMedia, size=[...ImageToTextConverter.DEFAULT_MEDIA_SIZE], readyCB=null, errorCB=null) {
+        this.clear()
+
+        this._media = new ImageDisplay(sourceMedia, [0,0], size, errorCB, (img)=>{
+            //img.size = [img.size[0]>>0, img.size[1]>>0]
+
+            if (img.isDynamic) this._CVS.start()
+            else {
+                this._CVS.stop()
+                this.generate()
+            }
+            
             if (CDEUtils.isFunction(readyCB)) readyCB(this)
         }, null, null, true)
 
@@ -61,32 +68,32 @@ class ImageToTextConverter {
     }
 
     #mapPixels(pxGroupingSize=5) {
-        let CVS = this._CVS, media = this._media, width = media.width>>0, height = media.height>>0, data = CVS.ctx.getImageData(0, 0, width, height).data,
-            x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize**2)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, bigPixels = [], ceil = Math.ceil
+        let CVS = this._CVS, media = this._media, width = (media.width>>0)>CVS.width?CVS.width:(media.width>>0), height = (media.height>>0)>CVS.height?CVS.height:(media.height>>0), data = CVS.ctx.getImageData(0, 0, width, height).data,
+            x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize**2)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, bigPixels = [], minDif = CDEUtils.getAcceptableDiff
 
-            for (y=0;y<height;y+=pxGroupingSize) {
-                atY = y*pxGroupingSize
-                for (x=0;x<width;x+=pxGroupingSize) {
-                    atX = x*pxGroupingSize
-                    const overflow = width-(x+pxGroupingSize), bigPx = [], offsetX = ((((atX/pxGroupingSize)/width)*bigPxCountX)*pxGroupingSize*4), offsetY = ((((atY/pxGroupingSize)/height)*bigPxCountY)*pxGroupingCount*bigPxCountX)
-                    
-                    for (let i=0,adjust=0;i<pxGroupingCount;i+=4) {
-                        if (!((i/4)%pxGroupingSize)&&i) adjust = (width*4)*((i/pxGroupingCount)*pxGroupingSize)-i
-                        atI = ceil(offsetX+offsetY+i+adjust)
+        for (y=0;y<height;y+=pxGroupingSize) {
+            atY = y*pxGroupingSize
+            for (x=0;x<width;x+=pxGroupingSize) {
+                atX = x*pxGroupingSize
+                const overflow = width-(x+pxGroupingSize), bigPx = [], offsetX = minDif((((atX/pxGroupingSize)/width)*bigPxCountX)*pxGroupingSize*4, 0.000001), offsetY = minDif((((atY/pxGroupingSize)/height)*bigPxCountY)*pxGroupingCount*bigPxCountX, 0.000001)
+                
+                for (let i=0,adjust=0;i<pxGroupingCount;i+=4) {
+                    if (!((i/4)%pxGroupingSize)&&i) adjust = (width*4)*((i/pxGroupingCount)*pxGroupingSize)-i
+                    atI = offsetX+offsetY+i+adjust
 
-                        const r = data[atI], g = data[atI+1], b = data[atI+2]
-                        bigPx.push((r==null || g==null || b==null || (i/4)%(pxGroupingSize) >= pxGroupingSize+overflow) ? null : (r+g+b)/3)
-                    }
-
-                    let b_ll = bigPx.length, total=0, nullCount=0
-                    for (let i=0;i<b_ll;i++) {
-                        const pxAvg = bigPx[i]
-                        if (pxAvg==null) nullCount++
-                        else total+=pxAvg
-                    }
-                    bigPixels.push({x, y, avg:total/(b_ll-nullCount)||0})// TODO optimize
+                    const r = data[atI], g = data[atI+1], b = data[atI+2]
+                    bigPx.push((!data[atI+3] || r==null || g==null || b==null || (i/4)%(pxGroupingSize) >= pxGroupingSize+overflow) ? null : (r+g+b)/3)
                 }
+
+                let b_ll = bigPx.length, total=0, nullCount=0
+                for (let i=0;i<b_ll;i++) {
+                    const pxAvg = bigPx[i]
+                    if (pxAvg==null) nullCount++
+                    else total+=pxAvg
+                }
+                bigPixels.push({x, y, avg:total/(b_ll-nullCount)||0})// TODO optimize
             }
+        }
 
         return bigPixels
     }
@@ -126,7 +133,7 @@ class ImageToTextConverter {
                 if (ImageDisplay.isVideoFormatSupported(file)) this.loadMedia(ImageDisplay.loadVideo(file))
                 else if (ImageDisplay.isImageFormatSupported(file)) {
                     const fileReader = new FileReader()
-                    fileReader.onload=e=>this.loadMedia(ImageDisplay.loadImage(e.target.result))
+                    fileReader.onload=e=>this.loadMedia(ImageDisplay.loadImage(e.target.result, true))
                     fileReader.readAsDataURL(file)
                 }
             }
@@ -140,6 +147,7 @@ class ImageToTextConverter {
 
     clear() {
         this._CVS.removeAllObjects()
+        this._CVS.clear()
     }
 
     /**

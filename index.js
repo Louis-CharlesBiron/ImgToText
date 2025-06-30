@@ -1,5 +1,4 @@
-
-const converter = new ImageToTextConverter((text)=>showGeneratedText.value=text, document.getElementById("imgInputDisplay"), 5)
+const converter = new ImageToTextConverter((text)=>showGeneratedText.value=text, null, document.getElementById("imgInputDisplay"))
 
 // FILE INPUT
 converter.createHTMLFileInput(imgInput)
@@ -7,11 +6,13 @@ converter.createHTMLFileInput(imgInput)
 // CAMERA CAPTURE INPUT
 camBtn.onclick=()=>{
     converter.loadMedia(ImageDisplay.loadCamera())
+    imgInput.value = ""
 }
 
 // SCREEN CAPTURE INPUT
 screenBtn.onclick=()=>{
     converter.loadMedia(ImageDisplay.loadCapture())
+    imgInput.value = ""
 }
 
 
@@ -26,13 +27,17 @@ const settingsBlocks = [
     [lineHeightSlider, manualLineHeight, lineHeightValue, (value)=>{showGeneratedText.style.lineHeight = value+"px"}],
     [fontSizeSlider, manualFontSize, fontSizeValue, (value)=>{showGeneratedText.style.fontSize = value+"px"}],
     [widthSlider, manualWidth, widthValue, (value)=>{
-        converter._media.size = [value+"%", converter._media.size[1]]
-        converter.generate()
+        if (converter._media) {
+            converter._media.size = [value+"%", converter._media.size[1]]
+            converter.generate()
+        }
         return value+"%"
     }],
     [heightSlider, manualHeight, heightValue, (value)=>{
-        converter._media.size = [converter._media.size[0], value+"%"]
-        converter.generate()
+        if (converter._media) {
+            converter._media.size = [converter._media.size[0], value+"%"]
+            converter.generate()
+        }
         return value+"%"
     }]
 ]

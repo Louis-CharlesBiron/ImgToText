@@ -163,12 +163,13 @@ class CDEUtils {
 
     /**
     * Rounds the specied decimal number if it's close enough to its rounded value 
-    * @param {Number} n: a decimal number 
+    * @param {Number} num: a decimal number 
     * @param {Number} acceptableDiff: the minimal difference between the given decimal number and it's rounded conterpart, for them be considered the same 
     * @returns The potentially adjusted number
     */
-    static getAcceptableDiff(n, acceptableDiff=CDEUtils.DEFAULT_ACCEPTABLE_DIFFERENCE) {
-        return Math.round(n)-n <= acceptableDiff ? Math.round(n) : n
+    static getAcceptableDiff(num, acceptableDiff=CDEUtils.DEFAULT_ACCEPTABLE_DIFFERENCE) {
+        const rounded = Math.round(num)
+        return rounded-num <= acceptableDiff ? rounded : num
     }
 
     /**
@@ -2946,6 +2947,7 @@ class Canvas {
 
     // removes all objects added to the canvas
     removeAllObjects() {
+        this.getObjs(ImageDisplay).forEach(img=>img.remove())
         this.remove("*")
     }
 
@@ -3210,12 +3212,17 @@ class Canvas {
         this._fpsLimit = CDEUtils.isDefined(fpsLimit)&&isFinite(fpsLimit) ? 1000/Math.max(fpsLimit, 0) : null
         this.#maxTime = this.#getMaxTime(fpsLimit)
     }
+    #visibilityChangeLastState = null
     set visibilityChangeCB(visibilityChangeCB) {
+        this.#visibilityChangeLastState = this._state
         this._visibilityChangeCB = (isVisible, CVS, e)=>{
-            if (isVisible) {
-                this.startLoop()
-                this.resetReferences()
-            } else this.stopLoop()
+            if (!isVisible) this.#visibilityChangeLastState = this._state
+            if (this.#visibilityChangeLastState==1) {
+                if (isVisible) {
+                    this.startLoop()
+                    this.resetReferences()
+                } else this.stopLoop()
+            }
             if (CDEUtils.isFunction(visibilityChangeCB)) visibilityChangeCB(isVisible, CVS, e)
         }
     }
@@ -4392,16 +4399,17 @@ class ImageDisplay extends _BaseObj {
     }
 
     // Returns a usable image source
-    static loadImage(src) {
+    static loadImage(src, forceOnload=false) {
         const image = new Image()
         image.src = src
+        if (forceOnload) image.setAttribute("fakeload", "1")
         return image
     }
 
     // Returns a usable video source
     static loadVideo(src, looping=true, autoPlay=true) {
         const video = document.createElement("video")
-        video.src = src instanceof File ? URL.createObjectURL(file) : src
+        video.src = src instanceof File ? URL.createObjectURL(src) : src
         video.preload = "auto"
         video.loop = looping
         if (autoPlay) {
@@ -4410,6 +4418,15 @@ class ImageDisplay extends _BaseObj {
             ImageDisplay.playMedia(video)
         }
         return video
+    }
+
+    // deletes the object from the canvas
+    remove() {
+        if (this._source instanceof HTMLVideoElement) {
+            this._source.remove()
+            this._source.pause()
+        }
+        this._parent.remove(this._id)
     }
 
     // Returns a usable camera capture source
@@ -4593,8 +4610,8 @@ class ImageDisplay extends _BaseObj {
         this.height = size[1]
         return this._size
     }
-	set width(width) {this._size[0] = typeof width=="string" ? (+width.replace("%","").trim()/100)*this.#naturalSize[0] : width==null ? this.#naturalSize[0] : width}
-	set height(height) {this._size[1] = typeof height=="string" ? (+height.replace("%","").trim()/100)*this.#naturalSize[1] : height==null ? this.#naturalSize[1] : height}
+	set width(width) {this._size[0] = (typeof width=="string" ? (+width.replace("%","").trim()/100)*this.#naturalSize[0] : width==null ? this.#naturalSize[0] : width)>>0}
+	set height(height) {this._size[1] = (typeof height=="string" ? (+height.replace("%","").trim()/100)*this.#naturalSize[1] : height==null ? this.#naturalSize[1] : height)>>0}
     set paused(paused) {
         try {
             if (paused) this._source.pause()
