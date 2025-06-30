@@ -17,11 +17,21 @@ class ImageToTextConverter {
     static DEFAULT_CVS_SIZE = [...ImageDisplay.RESOLUTIONS.SD]
     static DEFAULT_MEDIA_SIZE = ["90%", "45%"]
 
-    constructor(resultCB, sourceMedia, maxImageInputSize=ImageToTextConverter.DEFAULT_CVS_SIZE, pxGroupingSize=5, charSet, maxRefreshRate=30) {
-        this._CVS = this.#createCVS(maxImageInputSize, maxRefreshRate)
+    #cachedRange = null
+    /**
+     * @param {Function} resultCB: A callback called upon a convertion. (text)=>{} 
+     * @param {*} sourceMedia: The media to convert
+     * @param {[width, height] | Canvas | HTMLCanvasElement | OffscreenCanvas} maxMediaInputSize: Either a size array or any type of canvas 
+     * @param {Number} pxGroupingSize: The pixel output resolution. Examples, put 1 to get one character per media pixel, or put 5 to get one character per 5x5 pixels of the original media 
+     * @param {String[] | String} charSet: The characters used to draw the image going from least visible to most visible.
+     * @param {Number} maxRefreshRate: The maximal convertions per second 
+     */
+    constructor(resultCB, sourceMedia, maxMediaInputSize=ImageToTextConverter.DEFAULT_CVS_SIZE, pxGroupingSize=5, charSet, maxRefreshRate=30) {
+        this._CVS = this.#createCVS(maxMediaInputSize, maxRefreshRate)
         this._resultCB = resultCB
         this._pxGroupingSize = pxGroupingSize||5
         this._charSet = charSet??ImageToTextConverter.DEFAULT_CHARACTER_SET
+        this.#updateCachedRange()
         this._media = null
         if (sourceMedia) this.loadMedia(sourceMedia)
     }
@@ -40,34 +50,43 @@ class ImageToTextConverter {
         else canvas = new OffscreenCanvas(...ImageToTextConverter.DEFAULT_CVS_SIZE)
 
         const CVS = new Canvas(canvas, ()=>{
-            if (this._media?.initialized) {
-                const mappingResults = this.#mapPixels(this._pxGroupingSize), textResult = this.#getText(mappingResults, this._charSet)
-                this._resultCB(textResult)
-            }
+            if (this._media?.initialized) this._resultCB(this.#getText(this.#mapPixels(this._pxGroupingSize)))
         }, maxRefreshRate, null, null, null, true)
 
         return CVS
     }
 
+    // updates cached characters set range
+    #updateCachedRange() {
+        let range = [0], c_ll = this._charSet.length, rangeDivision = 255/c_ll
+        for (let i=1;i<c_ll;i++) range[i] = range[i-1]+rangeDivision
+        this.#cachedRange = range
+    }
+
+    /**
+     * Loads a media and converts it. Replaces any other curret media, if any.
+     * @param {ImageDisplay.SOURCE_TYPES} sourceMedia: The media to convert
+     * @param {[width, height]} size: The size of the media
+     * @param {Function?} readyCB: Function called when the media is loaded
+     * @param {Function?} errorCB: Function called upon any error loading the media
+     */
     loadMedia(sourceMedia, size=[...ImageToTextConverter.DEFAULT_MEDIA_SIZE], readyCB=null, errorCB=null) {
         this.clear()
 
         this._media = new ImageDisplay(sourceMedia, [0,0], size, errorCB, (img)=>{
-            //img.size = [img.size[0]>>0, img.size[1]>>0]
-
             if (img.isDynamic) this._CVS.start()
             else {
                 this._CVS.stop()
                 this.generate()
             }
-            
             if (CDEUtils.isFunction(readyCB)) readyCB(this)
         }, null, null, true)
 
         this._CVS.add(this._media)
     }
 
-    #mapPixels(pxGroupingSize=5) {
+    // groups the media pixels according to pxGroupingSize and returns the y and the average value of each
+    #mapPixels(pxGroupingSize) {
         let CVS = this._CVS, media = this._media, width = (media.width>>0)>CVS.width?CVS.width:(media.width>>0), height = (media.height>>0)>CVS.height?CVS.height:(media.height>>0), data = CVS.ctx.getImageData(0, 0, width, height).data,
             x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize**2)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, bigPixels = [], minDif = CDEUtils.getAcceptableDiff
 
@@ -91,23 +110,23 @@ class ImageToTextConverter {
                     if (pxAvg==null) nullCount++
                     else total+=pxAvg
                 }
-                bigPixels.push({x, y, avg:total/(b_ll-nullCount)||0})// TODO optimize
+                bigPixels.push([y, total/(b_ll-nullCount)||0])
             }
         }
 
         return bigPixels
     }
 
-    #getText(pixelMappingResults, chars) {
-        let range = [0], c_ll = chars.length, rangeDivision = 255/c_ll, p_ll = pixelMappingResults.length, textResults = "", lastY=0
-        for (let i=1;i<c_ll;i++) range[i] = range[i-1]+rangeDivision
+    // converts the results of mapPixels() to characters based on the current charSet
+    #getText(pixelMappingResults) {
+        let range = this.#cachedRange, chars = this._charSet, p_ll = pixelMappingResults.length, textResults = "", lastY = 0
 
         for (let i=0;i<p_ll;i++) {
-            let bigPx = pixelMappingResults[i], y = bigPx.y, avg = bigPx.avg, atValue = -1, charIndex = 0
+            let bigPx = pixelMappingResults[i], y = bigPx[0], atValue = -1, charIndex = 0
 
             for (let i=0;i<c_ll;i++) {
                 const newValue = range[i]
-                if (newValue<=avg && newValue>atValue) {
+                if (newValue<=bigPx[1] && newValue>atValue) {
                     atValue = newValue
                     charIndex = i
                 }
@@ -121,7 +140,13 @@ class ImageToTextConverter {
         return textResults
     }
 
-    createHTMLFileInput(id, onInputCB) {
+    /**
+     * Creates a HTML file input according to this program's restrictions and automatically loads received medias
+     * @param {Number? | HTMLInputElement?} id: Either the id of the newly created input or an existing input to append the features to 
+     * @param {Function?} onInputCB: Custom callback called on input
+     * @returns the created HTML input
+     */
+    createHTMLFileInput(id=null, onInputCB=null) {
         const usesOldInput = id instanceof HTMLInputElement, input = usesOldInput ? id : document.createElement("input")
         input.type = "file"
         if (id && !usesOldInput) input.id = id
@@ -141,10 +166,12 @@ class ImageToTextConverter {
         return input
     }
 
+    // Forces a convertion
     generate() {
         this._CVS.drawSingleFrame()
     }
 
+    // Clears anything drawn on the converter's canvas
     clear() {
         this._CVS.removeAllObjects()
         this._CVS.clear()
@@ -170,17 +197,26 @@ class ImageToTextConverter {
         return the best version of the convertion
     */
 
-    get CVS() {
-        return this._CVS
+    get CVS() {return this._CVS}
+    get cvs() {return this._CVS.cvs}
+    get size() {return this._CVS.size}
+    get charSet() {return this._charSet}
+    get media() {return this._media}
+    get pxGroupingSize() {return this._pxGroupingSize}
+    get resultCB() {return this._resultCB}
+    get maxRefreshRate() {return this._CVS.fpsLimit}
+
+    set size(size) {
+        this._CVS.width = size[0]
+        this._CVS.height = size[1]
     }
-    get cvs() {
-        return this._CVS.cvs
+    set charSet(charSet) {
+        if (typeof charSet=="string") this._charSet = [...charSet]
+        else this._charSet = charSet
+        this.#updateCachedRange()
     }
-    get size() {
-        return this._CVS.size
-    }
-    get fpsLimit() {
-        return this._CVS.fpsLimit
-    }
+    set pxGroupingSize(pxGroupingSize) {this._pxGroupingSize = pxGroupingSize}
+    set maxRefreshRate(maxRefreshRate) {this._CVS.fpsLimit = maxRefreshRate} 
+    set resultCB(resultCB) {this._resultCB = resultCB} 
 
 }
