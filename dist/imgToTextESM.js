@@ -1,5 +1,4 @@
-
-export class ImageToTextConverter {
+import{ImageDisplay,Canvas,CDEUtils}from'cdejs';export class ImageToTextConverter {
     static DEFAULT_CHARACTER_SETS = {
         VERY_LOW:[..." .:"],
         DOTS:[..." .Â·':"],
@@ -16,6 +15,7 @@ export class ImageToTextConverter {
     static DEFAULT_CHARACTER_SET = ImageToTextConverter.DEFAULT_CHARACTER_SETS.LOW
     static DEFAULT_CVS_SIZE = [...ImageDisplay.RESOLUTIONS.MAX]
     static DEFAULT_MEDIA_SIZE = ["90%", "45%"]
+    static DEFAULT_MEDIA_ERROR_CALLBACK = (errorCode, media)=>console.warn("Error while loading media:", ImageDisplay.getErrorFromCode(errorCode), "("+media+")")
 
     #cachedRange = null
     /**
@@ -70,7 +70,7 @@ export class ImageToTextConverter {
      * @param {Function?} readyCB: Function called when the media is loaded
      * @param {Function?} errorCB: Function called upon any error loading the media
      */
-    loadMedia(sourceMedia, size=[...ImageToTextConverter.DEFAULT_MEDIA_SIZE], readyCB=null, errorCB=null) {
+    loadMedia(sourceMedia, size=[...ImageToTextConverter.DEFAULT_MEDIA_SIZE], readyCB=null, errorCB=ImageToTextConverter.DEFAULT_MEDIA_ERROR_CALLBACK) {
         this.clear()
 
         this._media = new ImageDisplay(sourceMedia, [0,0], size, errorCB, (img)=>{
@@ -119,7 +119,7 @@ export class ImageToTextConverter {
 
     // converts the results of mapPixels() to characters based on the current charSet
     #getText(pixelMappingResults) {
-        let range = this.#cachedRange, chars = this._charSet, p_ll = pixelMappingResults.length, textResults = "", lastY = 0
+        let range = this.#cachedRange, chars = this._charSet, c_ll = chars.length, p_ll = pixelMappingResults.length, textResults = "", lastY = 0
 
         for (let i=0;i<p_ll;i++) {
             let bigPx = pixelMappingResults[i], y = bigPx[0], avg = bigPx[1], atValue = -1, charIndex = 0
@@ -158,7 +158,7 @@ export class ImageToTextConverter {
                 if (ImageDisplay.isVideoFormatSupported(file)) this.loadMedia(ImageDisplay.loadVideo(file))
                 else if (ImageDisplay.isImageFormatSupported(file)) {
                     const fileReader = new FileReader()
-                    fileReader.onload=e=>this.loadMedia(ImageDisplay.loadImage(e.target.result, true))
+                    fileReader.onload=e=>this.loadMedia(ImageDisplay.loadImage(e.target.result, null, true))
                     fileReader.readAsDataURL(file)
                 }
             }
@@ -218,5 +218,4 @@ export class ImageToTextConverter {
     set pxGroupingSize(pxGroupingSize) {this._pxGroupingSize = pxGroupingSize}
     set maxRefreshRate(maxRefreshRate) {this._CVS.fpsLimit = maxRefreshRate} 
     set resultCB(resultCB) {this._resultCB = resultCB} 
-
 }

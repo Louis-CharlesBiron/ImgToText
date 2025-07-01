@@ -6,6 +6,7 @@
 $at = Get-Location
 $root = Split-Path -Path $at -Parent
 $dist = "$root\dist"
+$bins = "$root\dist\bins"
 $deploy = "$root\deploy"
 $terser = "$deploy\node_modules\.bin\terser"
 
@@ -34,8 +35,9 @@ $c.wrapOrder.split(" ") | ForEach-Object {
     $mergedCode += "$content`n"
     $mergedCodeESM += "$($content -replace "class $className", "export class $className")`n"
 }
-$mergedCode.Trim()
-$mergedCodeESM.Trim()
+$mergedCode = "'use strict';$($mergedCode.Trim())"
+$mergedCodeESM = "import{ImageDisplay,Canvas,CDEUtils}from'cdejs';$($mergedCodeESM.Trim())"
+
 
 #CREATE MERGED FILE
 $toMinifyPath = New-Item "$dist\imgToText.js" -Value $mergedCode -Force
@@ -58,3 +60,10 @@ $minifiedCode = Get-Content -Path $minifiedCodePathUMD -Raw
 Set-Content -Path $minifiedCodePathUMD -Value @"
 (function(factory){typeof define=="function"&&define.amd?define(factory):factory()})((function(){"use strict";$minifiedCode;const classes={$UMDCJSClasses};if(typeof window!=="undefined"){window.ImgToText=classes}else if(typeof module!=="undefined"&&module.exports)module.exports=classes}))
 "@
+
+#MINIFY BINS FILES
+$binFiles = @("global.js", "bigText.js")
+foreach ($filepath in $binFiles) {
+    $filepath = "$bins\$filepath"
+    Start-Process -FilePath $terser -ArgumentList "$filepath -o $bins\$((Get-Item $filepath).BaseName).min.js --compress --mangle"
+}

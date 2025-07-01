@@ -1,7 +1,7 @@
 {
-    "name": "cdejs",
+    "name": "imgtotext",
     "version": "1.0.0",
-    "description": "TODO",
+    "description": "ImgToText is a tool that converts any image/video into customizable text",
     "author": {
         "name": "Louis-Charles Biron",
         "email": "louirlesbiron6@gmail.com",
@@ -24,9 +24,26 @@
     "exports": {
         "import": "./imgToText.esm.js"
     },
+    "bin": {
+        "imgtotext": "./bins/global.min.js", 
+        "imgtotext-bigtext": "./bins/bigText.min.js"
+    },
     "homepage":"https://github.com/Louis-CharlesBiron/ImgToText",
     "keywords": [
-        "TODO",
+        "image",
+        "img",
+        "to",
+        "text",
+        "txt",
+        "video",
+        "convert",
+        "converter",
+        "2",
+        "imgToText",
+        "img2Txt",
+        "imageToTextConverter",
+        "transform",
+        "canvas",
         "javascript"
     ],
     "dependencies": {

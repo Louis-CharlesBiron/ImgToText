@@ -1,4 +1,5 @@
-const converter = new ImageToTextConverter((text)=>showGeneratedText.value=text, null, document.getElementById("imgInputDisplay"))
+const converter = new ImageToTextConverter((text)=>showGeneratedText.value=text, "asdasd.pmng", document.getElementById("imgInputDisplay"))
+
 
 // FILE INPUT
 converter.createHTMLFileInput(imgInput)
