@@ -19,7 +19,7 @@ screenBtn.onclick=()=>{
 // SLIDER SETTINGS
 const settingsBlocks = [
     [pxGroupingSlider, manualPxGrouping, pxGroupingValue, (value)=>{
-        converter._pxGroupingSize = value
+        converter.pxGroupingSize = value
         converter.generate()
         return "x"+value
     }],
@@ -27,15 +27,15 @@ const settingsBlocks = [
     [lineHeightSlider, manualLineHeight, lineHeightValue, (value)=>{showGeneratedText.style.lineHeight = value+"px"}],
     [fontSizeSlider, manualFontSize, fontSizeValue, (value)=>{showGeneratedText.style.fontSize = value+"px"}],
     [widthSlider, manualWidth, widthValue, (value)=>{
-        if (converter._media) {
-            converter._media.size = [value+"%", converter._media.size[1]]
+        if (converter.media) {
+            converter.media.size = [value+"%", converter.media.size[1]]
             converter.generate()
         }
         return value+"%"
     }],
     [heightSlider, manualHeight, heightValue, (value)=>{
-        if (converter._media) {
-            converter._media.size = [converter._media.size[0], value+"%"]
+        if (converter.media) {
+            converter.media.size = [converter.media.size[0], value+"%"]
             converter.generate()
         }
         return value+"%"
@@ -58,9 +58,9 @@ settingsBlocks.forEach((els)=>{
 
 
 // CHARS INPUT
-//charsInput.value = converter._charSet
+//charsInput.value = converter.charSet
 //charsInput.oninput=e=>{
-//    converter._charSet = e.target.value
+//    converter.charSet = e.target.value
 //    converter.generate()
 //}
 
@@ -73,7 +73,7 @@ Object.entries(ImageToTextConverter.DEFAULT_CHARACTER_SETS).forEach(([name, char
 
 defaultChars.value = ImageToTextConverter.DEFAULT_CHARACTER_SET
 defaultChars.oninput=e=>{
-    converter._charSet = e.target.value.split(",")
+    converter.charSet = e.target.value.split(",")
     converter.generate()
 }
 

@@ -14,7 +14,7 @@ class ImageToTextConverter {
         TEST_ASCII2:[" ","░","▒","▓","█"],
     }
     static DEFAULT_CHARACTER_SET = ImageToTextConverter.DEFAULT_CHARACTER_SETS.LOW
-    static DEFAULT_CVS_SIZE = [...ImageDisplay.RESOLUTIONS.SD]
+    static DEFAULT_CVS_SIZE = [...ImageDisplay.RESOLUTIONS.MAX]
     static DEFAULT_MEDIA_SIZE = ["90%", "45%"]
 
     #cachedRange = null
@@ -122,11 +122,11 @@ class ImageToTextConverter {
         let range = this.#cachedRange, chars = this._charSet, p_ll = pixelMappingResults.length, textResults = "", lastY = 0
 
         for (let i=0;i<p_ll;i++) {
-            let bigPx = pixelMappingResults[i], y = bigPx[0], atValue = -1, charIndex = 0
+            let bigPx = pixelMappingResults[i], y = bigPx[0], avg = bigPx[1], atValue = -1, charIndex = 0
 
             for (let i=0;i<c_ll;i++) {
                 const newValue = range[i]
-                if (newValue<=bigPx[1] && newValue>atValue) {
+                if (newValue<=avg && newValue>atValue) {
                     atValue = newValue
                     charIndex = i
                 }
@@ -150,7 +150,7 @@ class ImageToTextConverter {
         const usesOldInput = id instanceof HTMLInputElement, input = usesOldInput ? id : document.createElement("input")
         input.type = "file"
         if (id && !usesOldInput) input.id = id
-        input.accept = ImageDisplay.getSupportedHTMLAccept()
+        input.accept = ImageDisplay.getSupportedHTMLAcceptValue()
         input.oninput=()=>{
             const file = imgInput.files[0]
             if (CDEUtils.isFunction(onInputCB)) onInputCB(file, this)

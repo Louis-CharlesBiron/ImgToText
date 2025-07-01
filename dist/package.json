@@ -1,0 +1,35 @@
+{
+    "name": "cdejs",
+    "version": "1.0.0",
+    "description": "TODO",
+    "author": {
+        "name": "Louis-Charles Biron",
+        "email": "louirlesbiron6@gmail.com",
+        "url": "https://github.com/Louis-CharlesBiron"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Louis-CharlesBiron/ImgToText"
+    },
+    "type": "module",
+    "main": "imgToText.min.js",
+    "browser": "imgToText.min.js",
+    "files": [
+        "imgToText.esm.js",
+        "imgToText.min.js",
+        "readme.md",
+        "LICENSE"
+    ],
+    "exports": {
+        "import": "./imgToText.esm.js"
+    },
+    "homepage":"https://github.com/Louis-CharlesBiron/ImgToText",
+    "keywords": [
+        "TODO",
+        "javascript"
+    ],
+    "dependencies": {
+        "cdejs": "^1.1.6"
+    }
+}

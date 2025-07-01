@@ -1,0 +1,10 @@
+{
+  "name": "js_deploy_wrapper",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo 1"
+  },
+  "devDependencies": {
+    "terser": "^5.37.0"
+  }
+}
