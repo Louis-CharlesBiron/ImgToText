@@ -6,10 +6,10 @@ class ImageToTextConverter {
         LOW:[..." .:-~=+oOXHM"],// 13 shades
         LOW_LARGE:["  "," ."," :"," -"," ~"," ="," +"," o"," O"," X"," H"," M"],
         LOW_REVERSED:[..."MHXOo+=~-:. "],
-        MIDDLE:[..." .:-~=+oOXHMB8$W%@#░▒▓█"], // 23 shades,
-        HIGH_RANGE:[..." ˙.·';:,-^~=+coOXHMB8$W%@#░▒▓█"],// 30 shades
+        MIDDLE:[..." .:-~=+oOXHMB8$W%@#░▒▓█"],
+        HIGH_RANGE:[..." ˙.·';:,-^~=+coOXHMB8$W%@#░▒▓█"],
         HIGH_CENTRAL_SHADING:[..."MWVXvuo+;:-`. .`-:;+ouvXVMW"],
-        HIGH_CENTRAL_SHADING_REVERSED:[..." .,:;~-+=oO0BDWM#@█@#MWDB0Oo=+-~;:,. "],
+        HIGH_CENTRAL_SHADING_REVERSED:[..." .,:;~-+=oO0BDWMΞ#@█@#ΞMWDB0Oo=+-~;:,. "],
         TEST_ASCII:["░","▒","▓","█"],
         TEST_ASCII2:[" ","░","▒","▓","█"],
     }
@@ -38,10 +38,10 @@ class ImageToTextConverter {
     }
 
     /**
-     * Creates the CDE Canvas instance used for convertions
+     * Creates the CDEJS Canvas instance used for convertions
      * @param {[width, height] | Canvas | HTMLCanvasElement | OffscreenCanvas} sizeOrCanvas: Either a size array or any type of canvas 
      * @param {Number?} maxRefreshRate: The maximum framerate at which convertion will occur. (useful for dynamic convertions, such as videos) 
-     * @returns A CDE Canvas instance
+     * @returns A CDEJS Canvas instance
      */
     #createCVS(sizeOrCanvas, maxRefreshRate) {
         let canvas = null
@@ -62,28 +62,6 @@ class ImageToTextConverter {
         let range = [0], c_ll = this._charSet.length, rangeDivision = 255/c_ll
         for (let i=1;i<c_ll;i++) range[i] = range[i-1]+rangeDivision
         this.#cachedRange = range
-    }
-
-    /**
-     * Loads a media and converts it. Replaces any other curret media, if any.
-     * @param {ImageDisplay.SOURCE_TYPES} sourceMedia: The media to convert
-     * @param {[width, height]} size: The size of the media
-     * @param {Function?} readyCB: Function called when the media is loaded
-     * @param {Function?} errorCB: Function called upon any error loading the media
-     */
-    loadMedia(sourceMedia, size=[...ImageToTextConverter.DEFAULT_MEDIA_SIZE], readyCB=null, errorCB=ImageToTextConverter.DEFAULT_MEDIA_ERROR_CALLBACK) {
-        this.clear()
-
-        this._media = new ImageDisplay(sourceMedia, [0,0], size, errorCB, (img)=>{
-            if (img.isDynamic) this._CVS.start()
-            else {
-                this._CVS.stop()
-                this.generate()
-            }
-            if (CDEUtils.isFunction(readyCB)) readyCB(this)
-        }, null, null, true)
-
-        this._CVS.add(this._media)
     }
 
     // groups the media pixels according to pxGroupingSize and returns the y and the average value of each
@@ -139,6 +117,28 @@ class ImageToTextConverter {
         }
         
         return textResults
+    }
+
+    /**
+     * Loads a media and converts it. Replaces any other curret media, if any.
+     * @param {ImageDisplay.SOURCE_TYPES} sourceMedia: The media to convert
+     * @param {[width, height]} size: The size of the media
+     * @param {Function?} readyCB: Function called when the media is loaded
+     * @param {Function?} errorCB: Function called upon any error loading the media
+     */
+    loadMedia(sourceMedia, size=[...ImageToTextConverter.DEFAULT_MEDIA_SIZE], readyCB=null, errorCB=ImageToTextConverter.DEFAULT_MEDIA_ERROR_CALLBACK) {
+        this.clear()
+
+        this._media = new ImageDisplay(sourceMedia, [0,0], size, errorCB, (img)=>{
+            if (img.isDynamic) this._CVS.start()
+            else {
+                this._CVS.stop()
+                this.generate()
+            }
+            if (CDEUtils.isFunction(readyCB)) readyCB(this)
+        }, null, null, true)
+
+        this._CVS.add(this._media)
     }
 
     /**

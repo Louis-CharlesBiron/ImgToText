@@ -9,6 +9,7 @@ $dist = "$root\dist"
 $bins = "$root\dist\bins"
 $deploy = "$root\deploy"
 $terser = "$deploy\node_modules\.bin\terser"
+$version = (Get-Content "$dist\package.json" | ConvertFrom-Json).version
 
 # UPDATE DIST README
 Copy-Item "$root\readme.md" -Destination "$dist\readme.md" -Force
@@ -23,13 +24,11 @@ $fullPaths = Get-ChildItem "$root\src" -File -Recurse | ForEach-Object {$_.FullN
 $mergedCode = ""
 $mergedCodeESM = ""
 $UMDCJSClasses = ""
-$UMDJSClasses = ""
 $c.wrapOrder.split(" ") | ForEach-Object {
     $orderPath = $_
     $className = $_ -replace "\.js$", ""
 
     $UMDCJSClasses += "$className,"
-    $UMDJSClasses += "window.$className=$className;"
 
     $content = Get-Content ($fullPaths | Where-Object {(Split-Path $_ -Leaf) -eq $orderPath}) -Raw
     $mergedCode += "$content`n"
@@ -52,14 +51,21 @@ if (-not (Test-Path $terser)) {
 
 #MINIFY LIBRARY FILES
 $minifiedCodePathUMD = "$dist\imgToText.min.js"
-Start-Process -FilePath $terser -ArgumentList "$toMinifyPathESM -o $dist\imgToText.esm.js --compress"
+$minifiedCodePathESM = "$dist\imgToText.esm.js"
+Start-Process -FilePath $terser -ArgumentList "$toMinifyPathESM -o $minifiedCodePathESM --compress"
 Start-Process -FilePath $terser -ArgumentList "$toMinifyPath -o $minifiedCodePathUMD --compress" -wait
 
-#ADD UMD WRAPPER
-$minifiedCode = Get-Content -Path $minifiedCodePathUMD -Raw
+#ADD UMD VERSION AND VERSION COMMENT
+$minifiedCode = Get-Content $minifiedCodePathUMD -Raw
+$minifiedDependencyCode = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Louis-CharlesBiron/canvasDotEffect/main/dist/canvasDotEffect.min.js" -UseBasicParsing).Content
+
 Set-Content -Path $minifiedCodePathUMD -Value @"
-(function(factory){typeof define=="function"&&define.amd?define(factory):factory()})((function(){"use strict";$minifiedCode;const classes={$UMDCJSClasses};if(typeof window!=="undefined"){window.ImgToText=classes}else if(typeof module!=="undefined"&&module.exports)module.exports=classes}))
+// ImgToText UMD - v$version
+(function(factory){if(typeof define==="function"&&define.amd)define([],factory);else if(typeof module==="object"&&module.exports)module.exports=factory();else if(typeof window!=="undefined")window.ImgToText=factory();else this.ImgToText=factory()})(function(){$minifiedDependencyCode;$minifiedCode;return{$UMDCJSClasses}})
 "@
+
+#ADD VERSION COMMENT TO ESM
+Set-Content -Path $minifiedCodePathESM -Value "// ImgToText ESM - v$version`n$(Get-Content $minifiedCodePathESM -Raw)"
 
 #MINIFY BINS FILES
 $binFiles = @("global.js", "bigText.js")

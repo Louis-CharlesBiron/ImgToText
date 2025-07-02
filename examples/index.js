@@ -1,4 +1,6 @@
-const converter = new ImageToTextConverter((text)=>showGeneratedText.value=text, "asdasd.pmng", document.getElementById("imgInputDisplay"))
+let ImageToTextConverter = window.ImgToText.ImageToTextConverter, {ImageDisplay} = window.CDE 
+
+const converter = new ImageToTextConverter((text)=>showGeneratedText.value=text, null, document.getElementById("imgInputDisplay"))
 
 
 // FILE INPUT
