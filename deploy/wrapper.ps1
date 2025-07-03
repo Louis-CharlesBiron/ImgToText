@@ -30,7 +30,7 @@ $c.wrapOrder.split(" ") | ForEach-Object {
 
     $UMDCJSClasses += "$className,"
 
-    $content = Get-Content ($fullPaths | Where-Object {(Split-Path $_ -Leaf) -eq $orderPath}) -Raw
+    $content = Get-Content ($fullPaths | Where-Object {(Split-Path $_ -Leaf) -eq $orderPath}) -Raw -Encoding UTF8
     $mergedCode += "$content`n"
     $mergedCodeESM += "$($content -replace "class $className", "export class $className")`n"
 }
@@ -56,20 +56,35 @@ Start-Process -FilePath $terser -ArgumentList "$toMinifyPathESM -o $minifiedCode
 Start-Process -FilePath $terser -ArgumentList "$toMinifyPath -o $minifiedCodePathUMD --compress" -wait
 
 #ADD UMD VERSION AND VERSION COMMENT
-$minifiedCode = Get-Content $minifiedCodePathUMD -Raw
+$minifiedCode = Get-Content $minifiedCodePathUMD -Raw -Encoding UTF8
+# TODO
+# 1. trim out the UMD wrapper from the CDE minjs (.slice() should work)
+# 2. obtain the classes from CDE minjs
+
+#$classesDelimiter = "return{"
+#$UMDWrapper2ndSectionStart = $res.LastIndexOf($classesDelimiter)
+#$UMDWrapper1stSectionEnd = 281
+#
+#write-host "THE MINIFIED CODE:"
+#write-host $res.Substring($UMDWrapper1stSectionEnd, ($UMDWrapper2ndSectionStart-$UMDWrapper1stSectionEnd))
+#
+#write-host "THE CLASSES:"
+#write-host $res.Substring($UMDWrapper2ndSectionStart+$classesDelimiter.Length, $res.Length-($UMDWrapper2ndSectionStart+$classesDelimiter.Length)-3)
+
 $minifiedDependencyCode = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Louis-CharlesBiron/canvasDotEffect/main/dist/canvasDotEffect.min.js" -UseBasicParsing).Content
+$dependencyUMDCJSClasses = "TODO"
 
 Set-Content -Path $minifiedCodePathUMD -Value @"
 // ImgToText UMD - v$version
-(function(factory){if(typeof define==="function"&&define.amd)define([],factory);else if(typeof module==="object"&&module.exports)module.exports=factory();else if(typeof window!=="undefined")window.ImgToText=factory();else this.ImgToText=factory()})(function(){$minifiedDependencyCode;$minifiedCode;return{$UMDCJSClasses}})
+(function(factory){if(typeof define==="function"&&define.amd)define([],factory);else if(typeof module==="object"&&module.exports)module.exports=factory();else if(typeof window!=="undefined"){const{CDE,ImgToText}=factory();window.CDE=CDE;window.ImgToText=ImgToText}else{const{CDE,ImgToText}=factory();this.CDE=CDE;this.ImgToText=ImgToText})(function(){$minifiedDependencyCode;$minifiedCode;return{ImgToText:$UMDCJSClasses,CDE:$dependencyUMDCJSClasses}})
 "@
 
 #ADD VERSION COMMENT TO ESM
-Set-Content -Path $minifiedCodePathESM -Value "// ImgToText ESM - v$version`n$(Get-Content $minifiedCodePathESM -Raw)"
+Set-Content -Path $minifiedCodePathESM -Value "// ImgToText ESM - v$version`n$(Get-Content $minifiedCodePathESM -Raw -Encoding UTF8)"
 
 #MINIFY BINS FILES
 $binFiles = @("global.js", "bigText.js")
 foreach ($filepath in $binFiles) {
-    $filepath = "$bins\$filepath"
-    Start-Process -FilePath $terser -ArgumentList "$filepath -o $bins\$((Get-Item $filepath).BaseName).min.js --compress --mangle"
+    $path = "$bins\$filepath"
+    Start-Process -FilePath $terser -ArgumentList "$path -o $bins\$((Get-Item $filepath).BaseName).min.js --compress --mangle"
 }

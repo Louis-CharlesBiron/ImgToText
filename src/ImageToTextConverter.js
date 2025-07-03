@@ -15,7 +15,7 @@ class ImageToTextConverter {
     }
     static DEFAULT_CHARACTER_SET = ImageToTextConverter.DEFAULT_CHARACTER_SETS.LOW
     static DEFAULT_CVS_SIZE = [...ImageDisplay.RESOLUTIONS.MAX]
-    static DEFAULT_MEDIA_SIZE = ["90%", "45%"]
+    static DEFAULT_MEDIA_SIZE = ["92%", "45%"]
     static DEFAULT_MEDIA_ERROR_CALLBACK = (errorCode, media)=>console.warn("Error while loading media:", ImageDisplay.getErrorFromCode(errorCode), "("+media+")")
 
     #cachedRange = null
@@ -186,16 +186,40 @@ class ImageToTextConverter {
         - letterSpacing (0px)
         - line height (18px)
         - font-size (16px)
-        - groupingSize (5px)
+        - groupingSize (5x5)
 
         - media width
         - media height
 
         (MAYBE) a max width/height
 
-
-
         return the best version of the convertion
+
+
+
+
+
+
+
+
+
+
+
+
+        ----------------- N O T E S-----------------------------
+        
+        ==========FOR BEST RENDERING WITH GD ICON==========
+        --- DEFAULTS ---
+        letterSpacing: 0
+        line height: 18
+        font-size: 16
+        init img size: 250x250
+        groupingSize: 5x5
+
+        --- CHANGING GROUPING SIZE ---
+        groupingSize: 7x7 -> 6x6 -> 5x5 -> 4x4 -> 3x3 -> 2x2
+        Aspect ratio kept at [89%, 45%] -> [91%, 45%] -> [92%, 45%] -> [91%, 45%] -­> [91%, 45%] -> [89%, 45%]
+
     */
 
     get CVS() {return this._CVS}

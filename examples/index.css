@@ -50,6 +50,7 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type=
     border: none;
     font-family: monospace;
 
+    font-size: 16px;
     letter-spacing: 0px;
     line-height: 18px;
 }

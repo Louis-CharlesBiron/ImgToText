@@ -1,5 +1,3 @@
-let ImageToTextConverter = window.ImgToText.ImageToTextConverter, {ImageDisplay} = window.CDE 
-
 const converter = new ImageToTextConverter((text)=>showGeneratedText.value=text, null, document.getElementById("imgInputDisplay"))
 
 
