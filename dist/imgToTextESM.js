@@ -1,20 +1,20 @@
 import{ImageDisplay,Canvas,CDEUtils}from'cdejs';export class ImageToTextConverter {
     static DEFAULT_CHARACTER_SETS = {
         VERY_LOW:[..." .:"],
-        DOTS:[..." .Â·':"],
+        DOTS:[..." .·':"],
         LOW:[..." .:-~=+oOXHM"],// 13 shades
         LOW_LARGE:["  "," ."," :"," -"," ~"," ="," +"," o"," O"," X"," H"," M"],
         LOW_REVERSED:[..."MHXOo+=~-:. "],
-        MIDDLE:[..." .:-~=+oOXHMB8$W%@#â–‘â–’â–“â–ˆ"], // 23 shades,
-        HIGH_RANGE:[..." Ë™.Â·';:,-^~=+coOXHMB8$W%@#â–‘â–’â–“â–ˆ"],// 30 shades
+        MIDDLE:[..." .:-~=+oOXHMB8$W%@#░▒▓█"],
+        HIGH_RANGE:[..." ˙.·';:,-^~=+coOXHMB8$W%@#░▒▓█"],
         HIGH_CENTRAL_SHADING:[..."MWVXvuo+;:-`. .`-:;+ouvXVMW"],
-        HIGH_CENTRAL_SHADING_REVERSED:[..." .,:;~-+=oO0BDWM#@â–ˆ@#MWDB0Oo=+-~;:,. "],
-        TEST_ASCII:["â–‘","â–’","â–“","â–ˆ"],
-        TEST_ASCII2:[" ","â–‘","â–’","â–“","â–ˆ"],
+        HIGH_CENTRAL_SHADING_REVERSED:[..." .,:;~-+=oO0BDWMΞ#@█@#ΞMWDB0Oo=+-~;:,. "],
+        TEST_ASCII:["░","▒","▓","█"],
+        TEST_ASCII2:[" ","░","▒","▓","█"],
     }
     static DEFAULT_CHARACTER_SET = ImageToTextConverter.DEFAULT_CHARACTER_SETS.LOW
     static DEFAULT_CVS_SIZE = [...ImageDisplay.RESOLUTIONS.MAX]
-    static DEFAULT_MEDIA_SIZE = ["90%", "45%"]
+    static DEFAULT_MEDIA_SIZE = ["92%", "45%"]
     static DEFAULT_MEDIA_ERROR_CALLBACK = (errorCode, media)=>console.warn("Error while loading media:", ImageDisplay.getErrorFromCode(errorCode), "("+media+")")
 
     #cachedRange = null
@@ -37,10 +37,10 @@ import{ImageDisplay,Canvas,CDEUtils}from'cdejs';export class ImageToTextConverte
     }
 
     /**
-     * Creates the CDE Canvas instance used for convertions
+     * Creates the CDEJS Canvas instance used for convertions
      * @param {[width, height] | Canvas | HTMLCanvasElement | OffscreenCanvas} sizeOrCanvas: Either a size array or any type of canvas 
      * @param {Number?} maxRefreshRate: The maximum framerate at which convertion will occur. (useful for dynamic convertions, such as videos) 
-     * @returns A CDE Canvas instance
+     * @returns A CDEJS Canvas instance
      */
     #createCVS(sizeOrCanvas, maxRefreshRate) {
         let canvas = null
@@ -61,28 +61,6 @@ import{ImageDisplay,Canvas,CDEUtils}from'cdejs';export class ImageToTextConverte
         let range = [0], c_ll = this._charSet.length, rangeDivision = 255/c_ll
         for (let i=1;i<c_ll;i++) range[i] = range[i-1]+rangeDivision
         this.#cachedRange = range
-    }
-
-    /**
-     * Loads a media and converts it. Replaces any other curret media, if any.
-     * @param {ImageDisplay.SOURCE_TYPES} sourceMedia: The media to convert
-     * @param {[width, height]} size: The size of the media
-     * @param {Function?} readyCB: Function called when the media is loaded
-     * @param {Function?} errorCB: Function called upon any error loading the media
-     */
-    loadMedia(sourceMedia, size=[...ImageToTextConverter.DEFAULT_MEDIA_SIZE], readyCB=null, errorCB=ImageToTextConverter.DEFAULT_MEDIA_ERROR_CALLBACK) {
-        this.clear()
-
-        this._media = new ImageDisplay(sourceMedia, [0,0], size, errorCB, (img)=>{
-            if (img.isDynamic) this._CVS.start()
-            else {
-                this._CVS.stop()
-                this.generate()
-            }
-            if (CDEUtils.isFunction(readyCB)) readyCB(this)
-        }, null, null, true)
-
-        this._CVS.add(this._media)
     }
 
     // groups the media pixels according to pxGroupingSize and returns the y and the average value of each
@@ -141,6 +119,28 @@ import{ImageDisplay,Canvas,CDEUtils}from'cdejs';export class ImageToTextConverte
     }
 
     /**
+     * Loads a media and converts it. Replaces any other curret media, if any.
+     * @param {ImageDisplay.SOURCE_TYPES} sourceMedia: The media to convert
+     * @param {[width, height]} size: The size of the media
+     * @param {Function?} readyCB: Function called when the media is loaded
+     * @param {Function?} errorCB: Function called upon any error loading the media
+     */
+    loadMedia(sourceMedia, size=[...ImageToTextConverter.DEFAULT_MEDIA_SIZE], readyCB=null, errorCB=ImageToTextConverter.DEFAULT_MEDIA_ERROR_CALLBACK) {
+        this.clear()
+
+        this._media = new ImageDisplay(sourceMedia, [0,0], size, errorCB, (img)=>{
+            if (img.isDynamic) this._CVS.start()
+            else {
+                this._CVS.stop()
+                this.generate()
+            }
+            if (CDEUtils.isFunction(readyCB)) readyCB(this)
+        }, null, null, true)
+
+        this._CVS.add(this._media)
+    }
+
+    /**
      * Creates a HTML file input according to this program's restrictions and automatically loads received medias
      * @param {Number? | HTMLInputElement?} id: Either the id of the newly created input or an existing input to append the features to 
      * @param {Function?} onInputCB: Custom callback called on input
@@ -185,16 +185,40 @@ import{ImageDisplay,Canvas,CDEUtils}from'cdejs';export class ImageToTextConverte
         - letterSpacing (0px)
         - line height (18px)
         - font-size (16px)
-        - groupingSize (5px)
+        - groupingSize (5x5)
 
         - media width
         - media height
 
         (MAYBE) a max width/height
 
-
-
         return the best version of the convertion
+
+
+
+
+
+
+
+
+
+
+
+
+        ----------------- N O T E S-----------------------------
+        
+        ==========FOR BEST RENDERING WITH GD ICON==========
+        --- DEFAULTS ---
+        letterSpacing: 0
+        line height: 18
+        font-size: 16
+        init img size: 250x250
+        groupingSize: 5x5
+
+        --- CHANGING GROUPING SIZE ---
+        groupingSize: 7x7 -> 6x6 -> 5x5 -> 4x4 -> 3x3 -> 2x2
+        Aspect ratio kept at [89%, 45%] -> [91%, 45%] -> [92%, 45%] -> [91%, 45%] -­> [91%, 45%] -> [89%, 45%]
+
     */
 
     get CVS() {return this._CVS}
