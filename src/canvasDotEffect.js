@@ -2231,7 +2231,7 @@ class TextStyles {
     static DIRECTIONS = {LEFT_TO_RIGHT:"ltr", RIGHT_TO_LEFT:"rtl", INHERIT:"inherit"}
     static STRETCHES = {ULTRA_CONDENSED:"ultra-condensed", EXTRA_CONDENSED:"extra-condensed", CONDENSED:"condensed", SEMI_CONDENSED:"semi-condensed", NORMAL:"normal", SEMI_EXPANDED:"semi-expanded", EXPANDED:"expanded", EXTRA_EXPANDED:"extra-expanded", ULTRA_EXPANDED:"ultra-expanded"}
     static KERNINGS = {AUTO:"auto", NORMAL:"normal", NONE:"none"}
-    static ALIGNMENTS = {LEFT:"left", RIGTH:"normal", CENTER:"center", START:"start", END:"end"}
+    static ALIGNMENTS = {LEFT:"left", RIGHT:"right", CENTER:"center", START:"start", END:"end"}
     static BASELINES = {TOP:"top", BOTTOM:"bottom", HANGING:"hanging", MIDDLE:"middle", ALPHABETIC:"alphabetic", IDEOGRAPHIC:"ideographic"}
     static RENDERINGS = {AUTO:"auto", FAST:"optimizeSpeed", LEGIBLE:"optimizeLegibility", PRECISE:"geometricPrecision"}
     static DEFAULT_FONT = "32px Arial"
@@ -4695,6 +4695,7 @@ class TextDisplay extends _BaseObj {
     initialize() {
         this._textStyles = CDEUtils.isFunction(this._textStyles) ? this._textStyles(this.render, this) : this._textStyles??this.render.defaultTextProfile
         this.#resize()
+        this.initialized = true
         super.initialize()
     }
 
@@ -4725,7 +4726,7 @@ class TextDisplay extends _BaseObj {
                 
                 if (hasTransforms) ctx.setTransform(1,0,0,1,viewPos[0],viewPos[1])
             }
-        } else this.initialized = true
+        }
 
         super.draw(time, deltaTime)
     }

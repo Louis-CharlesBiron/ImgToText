@@ -36,7 +36,7 @@ $c.wrapOrder.split(" ") | ForEach-Object {
 }
 $UMDCJSClasses = $UMDCJSClasses.TrimEnd(",")
 $mergedCode = "'use strict';`n$($mergedCode.Trim())"
-$mergedCodeESM = "import{ImageDisplay,Canvas,CDEUtils}from'cdejs';$($mergedCodeESM.Trim())"
+$mergedCodeESM = "import{ImageDisplay,Canvas,CDEUtils,TextDisplay}from'cdejs';$($mergedCodeESM.Trim())"
 
 
 #CREATE MERGED FILE

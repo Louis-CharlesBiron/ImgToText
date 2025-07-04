@@ -1,7 +1,9 @@
-const {ImageToTextConverter} = window.ImgToText, {ImageDisplay} = window.CDE
+//const {ImageToTextConverter} = window.ImgToText, {ImageDisplay} = window.CDE
 
 const converter = new ImageToTextConverter((text)=>showGeneratedText.value=text, null, document.getElementById("imgInputDisplay"))
 
+
+converter.createBigText("CDEJS")//, null, (render, obj)=>new Gradient(render.ctx, obj, [[0, "black"], [1, "white"]], null, 90))
 
 // FILE INPUT
 converter.createHTMLFileInput(imgInput)
@@ -81,7 +83,7 @@ defaultChars.oninput=e=>{
 }
 
 copyBtn.onclick=()=>{
-        if (navigator.clipboard) navigator.clipboard.writeText(showGeneratedText.value.trim())
+        if (navigator.clipboard) navigator.clipboard.writeText(showGeneratedText.value.trimEnd())
         showGeneratedText.select()
         showGeneratedText.setSelectionRange(0, 99999)
 }

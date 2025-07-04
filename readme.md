@@ -2,12 +2,17 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/Louis-CharlesBiron/ImgToText?link=https%3A%2F%2Fgithub.com%2FLouis-CharlesBiron%2FImgToText%2Fcommits%2Fmain%2F&label=Last%20Commit)](https://github.com/Louis-CharlesBiron/ImgToText/commits/main/)
 [![NPM Version](https://img.shields.io/npm/v/imgtotext?label=Version&color=%237761c0)](https://www.npmjs.com/package/imgtotext)
 [![NPM Downloads](https://img.shields.io/npm/d18m/imgtotext?label=NPM%20Downloads&color=%231cc959)](https://www.npmjs.com/package/imgtotext)
-![GitHub Created At](https://img.shields.io/github/created-at/Louis-CharlesBiron/ImgToText?label=Since&color=orange)
-![NPM License](https://img.shields.io/npm/l/imgtotext?label=License&color=cadetblue)
+![GitHub Created At](https://img.shields.io/github/created-at/Louis-CharlesBiron/ImgToText?label=Since&color=violet)
+![NPM License](https://img.shields.io/npm/l/imgtotext?label=License&color=5f7aa0)
+
+
 
 # ImgToText
 
-**ImgToText is a concise library that converts any image/video into customizable text.**
+**ImgToText is a concise library that converts any image/video into customizable text usable!**
+
+
+
 
 # Table of Contents
 
@@ -21,9 +26,8 @@
 
 1. **Get the library file. (`npm install imgtotext` or [imgToText.min.js](https://github.com/Louis-CharlesBiron/ImgToText/blob/main/dist/imgToText.min.js))** 
 ```HTML
-    <!-- Only if you're using the browser version! Otherwise use: import {...} from "imgtotext" -->
-    <script src="ImgToText.min.js"></script>
-    TODO
+    <!-- Only if you're using the browser version! Otherwise use: import {ImageToTextConverter} from "imgtotext" -->
+    <script src="imgToText.min.js"></script>
 ```
 
 2. **In a JS file, create a new ImageToTextConverter instance.**
@@ -50,12 +54,13 @@ The ImageToTextConverter class allows the full convertion and customization of i
 
 
 ### **To load a new media** use the `loadMedia` function:
-###### - loadMedia(sourceMedia, size?, readyCB?, errorCB?)
+###### - loadMedia(sourceMedia, size?, croppingPositions?, errorCB?, readyCB?)
 ```js
     // Loading and converting a new image
     converter.loadMedia(
         "someImg.png",                          // The media path
         [100, 100],                             // The rendered size of the media
+        [[0,0], ["50%", "100%"]]                // Cropping to only use the left half of the media 
         ()=>console.log("Image loaded!"),       // Callback called upon media load
         ()=>console.warn("Error loading image!")// Callback called upon error loading media
     )
@@ -95,6 +100,73 @@ The ImageToTextConverter class allows the full convertion and customization of i
 # [Visual Examples](#table-of-contents)
 
 Coming soon (TODO)
+- img example
+- text example
+- camera/video example (gif)
+
+```
+   MMMMMMMM    MMMMMMMM       MMMMMMMMM      MMMMMMMM       MMMMMMMM     
+  MMMMMMMMM    MMMMMMMMM      MMMMMMMMM      MMMMMMMM      MMMMMMMMM     
+ MMMM    MM    MMM   MMMM     MMM                 MMM      MMM           
+ MMM           MMM    MMMM    MMM                 MMM      MMM           
+MMMM           MMM     MMM    MMMMMMMMM           MMM      MMMMMM        
+MMM            MMM     MMM    MMMMMMMMM           MMM       MMMMMMM      
+MMMM           MMM     MMM    MMM                 MMM         MMMMMM     
+ MMM           MMM    MMMM    MMM                 MMM            MMMM    
+ MMMM          MMM   MMMM     MMM            M   MMMM            MMMM    
+ MMMMMMMMMM    MMMMMMMMM      MMMMMMMMM      MMMMMMMM     MMMMMMMMMM     
+   MMMMMMMM    MMMMMMMM       MMMMMMMMM      MMMMMMM      MMMMMMMMM
+```
+
+![GD](https://static.wikia.nocookie.net/logopedia/images/4/41/Geometry_Dash_Icon.svg/revision/latest?cb=20220220121501)
+
+```
+
+Settings used:
+
+    Media width:  100%
+    Media height: 40%
+    Pixel Grouping Size: 3x3
+    Character set: [ " ", ".", ":", "-", "~", "=", "+", "o", "O", "X", "H", "M" ]
+
+    JS code: TODO
+
+
+++++ooooooooooo++ooooooooooooooooooooooooooooo~::~+ooooooooooooooooooooooooooooooo++
+++ooooOoooOooooooO~-::::::::::::::::::::::::.  ~=: .:::::::::::::::::--=++OXOOOOOoo+
+++ooo    .:. +oooO~:.....................   :=oooo+-.  ...................-~+OXOOOoo
+++ooo    .- .+ooo+~....................   ~+ooooooooo=:   ..................:~+OOoo+
+++ooo    -   =oo+~:..................  :=ooooooooooooooo-.  ..................:~Oo++
++++oo+~~=o+~~++=-:................   ~+ooooooooooooooooooo=:  .......::::......-=o++
+++++++oooo++=~-:::::::::::::::..  :=ooooooooo=--+oooooooooooo-.  .::.::::::::::-~O++
++oo+===~---::::::::::::::::::   ~+ooooooooo~..~~.:=oooooooooooo=:  .:::::::::::-~O++
++o+~::::::::::::::::::::::.  :=ooooooooo+- -+OOOO+- -+oooooooooooo-. .:::::::::-=O++
++o+~:::::::::::--:::::::.  ~+ooooooooooo=:.-oOOOOo-.-=oooo+:~ooooooo=:  .::::::-=O++
++o+~:::::::::::---:::.  :=ooooooooooooooooo-.:==:.~oooo+~.:~: -+ooooooo-. .::::-=O++
+oo+~--------------:.  ~+ooooooooo~: :=ooooooo=:-=oooo+: -=+oo+~.:~ooooooo=:  :-~=Ooo
+ooo~------------:  :+ooooooooo+-.-+o+-.-+oooooooooo~.:=oooooo+=- -+ooooooooo-. :~Ooo
+ooo=----------.  ~oooooooooo+: ~oOOOOoo~ :oooooo+: -+ooooooo~..~oooooooooooooo=: :=o
++o+~:---------  -+oooooooooooo~.:=ooo=:.~ooooo~.:=ooooooo=- -+ooooooooooooooo++~. :~
++o+~::::::::---:. .~oooooooooooo=:.:.-=oooo+- -+ooooooo~..~oooooooo+++++++++=:  .==+
++o+~:::::::::::---.  -=++++oooooooo~ooooo~.:=ooooooo=- -+++++++++++++++++=-.  .:~O++
++o+~::::::::::----:::  .-+++++++++++++=: -=ooooooo~..~+++++++++++++++++=:  ..::-~O++
++o+~:::::::-~~----:::::.  -=+++++++++. -++ooooo=- -+++++++++++++++++=-.  .:::::-~O++
++o+~-------=MMo~---------:  .-++++++++~.:=+++~..~+++++++++++++++++=:  .:--------~O++
++o+~-----~oM~.HX=-----------.  :=+++++++=: : -+++++++++++++++++=-.  .-----------~O++
++o+~-----OH:   OH=------------:. .-++++++++~+++++++++++++++++=:  .::-~~~~-------~O++
++o+~---~XX.     +M+--------------.  :=++++++++++++++++++++=-.  .:----~~~~------~~O++
++o+~--=Ho        -Mo---------------:. .-++++++++++++++++=:  .:-------~~~--------~O++
++o+~-+M=          :HX~----------------.  :~++++++++++=-.  :----------~~~~------~~O++
++o+~OM-............:OH=-----------------:. .-++++++=:  .:------------~~~~------~~O++
++++=H-:::::::::::::::oM+~------------------.  :~=-.  :---------------~~~~------~~O++
++++~-::::::::::---::::=Mo~-------------------:.   .:-----------------~~~~------~=O++
+++O~+oooooooooOOOOOOOOOXMO======================~~~=====================~~~~~~~~o+++
++++o~~~~~~~~~~~===~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~===~~~~~~~~~~~===~~~~~~~oo+++
+++++o+~~~~~~~~~==~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~===~~~~~~~~~~~===~~~~~+oooo++
+++++++o++=~~~~~==~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~===~~~~~~~~~~~===~=+oooooo+++
+++++++++++oo+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++oo+++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+```
 
 # [Npx Commands](#table-of-contents)
 
