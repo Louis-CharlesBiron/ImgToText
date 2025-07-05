@@ -3,7 +3,7 @@
 const converter = new ImageToTextConverter((text)=>showGeneratedText.value=text, null, document.getElementById("imgInputDisplay"))
 
 
-converter.createBigText("CDEJS")//, null, (render, obj)=>new Gradient(render.ctx, obj, [[0, "black"], [1, "white"]], null, 90))
+converter.createBigText("Some Img", "32px monospace", [2, 1.25])
 
 // FILE INPUT
 converter.createHTMLFileInput(imgInput)

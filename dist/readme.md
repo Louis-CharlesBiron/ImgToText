@@ -2,12 +2,39 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/Louis-CharlesBiron/ImgToText?link=https%3A%2F%2Fgithub.com%2FLouis-CharlesBiron%2FImgToText%2Fcommits%2Fmain%2F&label=Last%20Commit)](https://github.com/Louis-CharlesBiron/ImgToText/commits/main/)
 [![NPM Version](https://img.shields.io/npm/v/imgtotext?label=Version&color=%237761c0)](https://www.npmjs.com/package/imgtotext)
 [![NPM Downloads](https://img.shields.io/npm/d18m/imgtotext?label=NPM%20Downloads&color=%231cc959)](https://www.npmjs.com/package/imgtotext)
-![GitHub Created At](https://img.shields.io/github/created-at/Louis-CharlesBiron/ImgToText?label=Since&color=orange)
-![NPM License](https://img.shields.io/npm/l/imgtotext?label=License&color=cadetblue)
+![GitHub Created At](https://img.shields.io/github/created-at/Louis-CharlesBiron/ImgToText?label=Since&color=violet)
+![NPM License](https://img.shields.io/npm/l/imgtotext?label=License&color=5f7aa0)
+
+
 
 # ImgToText
 
-**ImgToText is a concise library that converts any image/video into customizable text.**
+**ImgToText is a concise library that converts any image/video into customizable text usable!**
+
+<span style="font-size:10px;font-family:monospace;">
+                                                                     
+            .oXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX= 
+            OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM-   
+            XMMM~........................................OMMM~  
+            XMMM-                         .~++~.         OMMM~   
+            XMMM-                        :HMMMMM-        OMMM~                          MMMMMMMM                                                               MMMMMMMMMM                                        
+            XMMM-                        -MMMMMM=        OMMM~                        MMMMMMMMM                                                               MMMMMMMMMM                                         
+            XMMM-                         -oXXO~         OMMM~                         MMM               MMMMMMMM        MMMMMMMMMM         MMMMMMM               MMM          MMMMMMMMMMM        MMMMMMMMMM     
+            XMMM-       +O:                              OMMM~                         MMMMM            MMMMMMMMMM       MMMMMMMMMMM      MMMMMMMMMM              MMM          MMMMMMMMMMM       MMMMMMMMMMM     
+            XMMM-     +HMMMX=                            OMMM~                          MMMMMMMM        MMM    MMM       MMM MMM MMM      MMM    MMM              MMM          MMMM MMM MM       MMM   MMMM      
+            XMMM-   =MMMMMMMMMo.            .+XMX=.      OMMM~                             MMMMMM      MMMM    MMM       MM  MM  MMM      MMMMMMMMMM              MMM          MMM  MM  MM       MMMMMMMMM       
+            XMMM-.=HMMMMMMMMMMMMX-       -oHMMMMMMMX=.   OMMM~                                MMM       MMM    MMM       MM  MM  MMM      MMM                     MMM          MMM  MM  MM       MMMMMMMMM    
+            XMMMoMMMMMMMMMMMMMMMMMH=..~OMMMMMMMMMMMMMMX=.OMMM~                         MMM  MMMMM       MMMMMMMMMM       MM  MM  MMM      MMMMMMMMMM              MMM          MMM  MM  MM       MMMMMM       
+            XMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM~                         MMMMMMMMM         MMMMMMMM        MM  MM  MMM       MMMMMMMMM           MMMMMMMMMM      MMM  MM  MM       MMMMMMMMMM   
+            XMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM~                                                                                                                                   MMM   MMMMM 
+            XMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM~                                                                                                                                   MMMMMMMMMM
+            XMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM~                                                                                                                                   MMMMMMMMM
+            XMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM~
+            XMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM~
+            OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM-
+            .oHMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMHX= 
+</span>
+
 
 # Table of Contents
 
@@ -21,9 +48,8 @@
 
 1. **Get the library file. (`npm install imgtotext` or [imgToText.min.js](https://github.com/Louis-CharlesBiron/ImgToText/blob/main/dist/imgToText.min.js))** 
 ```HTML
-    <!-- Only if you're using the browser version! Otherwise use: import {...} from "imgtotext" -->
-    <script src="ImgToText.min.js"></script>
-    TODO
+    <!-- Only if you're using the browser version! Otherwise use: import {ImageToTextConverter} from "imgtotext" -->
+    <script src="imgToText.min.js"></script>
 ```
 
 2. **In a JS file, create a new ImageToTextConverter instance.**
@@ -40,7 +66,7 @@ The ImageToTextConverter class allows the full convertion and customization of i
 ###### - `new ImageToTextConverter(resultCB, sourceMedia?, maxMediaInputSize?, pxGroupingSize?, charSet?, maxRefreshRate?)`
 - **resultCB** -> A callback called on each convertion, its only parameter is the text result of the latest convertion . `(text)=>{...}`
 - **sourceMedia**? -> The image/video to convert. One of [`ImageDisplay.SOURCE_TYPES`](https://github.com/Louis-CharlesBiron/canvasDotEffect?tab=readme-ov-file#table-of-contents).
-- **maxMediaInputSize**? -> The canvas or canvas size on which medias will be drawn. Either a size array *`[width, height]`*, a *`HTMLCanvasElement`* (to see medias before convertion), a *`OffscreenCanvas`*, or a [*cdejs `Canvas`*](https://github.com/Louis-CharlesBiron/canvasDotEffect?tab=readme-ov-file#table-of-contents). Defaults to about `[3840, 2160]`.
+- **maxMediaInputSize**? -> The canvas or canvas size on which medias will be drawn. Either a size array *`[width, height]`*, a *`HTMLCanvasElement`* (to see medias before convertion), a *`OffscreenCanvas`*, or a [*imgtotext `Canvas`*](https://github.com/Louis-CharlesBiron/canvasDotEffect?tab=readme-ov-file#table-of-contents). Defaults to about `[3840, 2160]`.
 - **pxGroupingSize**? -> The pixel output resolution. E.g: `1` converts pixels to characters at a 1:1 ratio (one character per media pixel), and `5` converts pixels to chars at a 25:1 ratio (one character per 5x5 pixels of the original media). Defaults to `5`.
 - **charSet**? -> The characters used to draw the image using text, going from least visible to most visible. Either a `String` or an `Array`. Defaults to `[" ", ".", ":", "-", "~", "=", "+", "o" , "O" , "X", "H", "M"]`.
 - **maxRefreshRate**? -> The aimed convertions per second (mostly for videos). Defaults to `30`fps.
@@ -50,12 +76,13 @@ The ImageToTextConverter class allows the full convertion and customization of i
 
 
 ### **To load a new media** use the `loadMedia` function:
-###### - loadMedia(sourceMedia, size?, readyCB?, errorCB?)
+###### - loadMedia(sourceMedia, size?, croppingPositions?, errorCB?, readyCB?)
 ```js
     // Loading and converting a new image
     converter.loadMedia(
-        "someImg.png",                          // The media path
-        [100, 100],                             // The rendered size of the media
+        "someImg.png",    // The media path
+        [100, 100],       // The rendered size of the media
+        [[0,0], ["50%", "100%"]]     // Cropping to only use the left half of the media 
         ()=>console.log("Image loaded!"),       // Callback called upon media load
         ()=>console.warn("Error loading image!")// Callback called upon error loading media
     )
@@ -95,6 +122,73 @@ The ImageToTextConverter class allows the full convertion and customization of i
 # [Visual Examples](#table-of-contents)
 
 Coming soon (TODO)
+- img example
+- text example
+- camera/video example (gif)
+
+```
+   MMMMMMMM    MMMMMMMM       MMMMMMMMM      MMMMMMMM       MMMMMMMM     
+  MMMMMMMMM    MMMMMMMMM      MMMMMMMMM      MMMMMMMM      MMMMMMMMM     
+ MMMM    MM    MMM   MMMM     MMM      MMM      MMM           
+ MMM           MMM    MMMM    MMM      MMM      MMM           
+MMMM           MMM     MMM    MMMMMMMMM           MMM      MMMMMM        
+MMM MMM     MMM    MMMMMMMMM           MMM       MMMMMMM      
+MMMM           MMM     MMM    MMM      MMM         MMMMMM     
+ MMM           MMM    MMMM    MMM      MMM MMMM    
+ MMMM          MMM   MMMM     MMM M   MMMM MMMM    
+ MMMMMMMMMM    MMMMMMMMM      MMMMMMMMM      MMMMMMMM     MMMMMMMMMM     
+   MMMMMMMM    MMMMMMMM       MMMMMMMMM      MMMMMMM      MMMMMMMMM
+```
+
+![GD](https://static.wikia.nocookie.net/logopedia/images/4/41/Geometry_Dash_Icon.svg/revision/latest?cb=20220220121501)
+
+```
+
+Settings used:
+
+    Media width:  100%
+    Media height: 40%
+    Pixel Grouping Size: 3x3
+    Character set: [ " ", ".", ":", "-", "~", "=", "+", "o", "O", "X", "H", "M" ]
+
+    JS code: TODO
+
+
+++++ooooooooooo++ooooooooooooooooooooooooooooo~::~+ooooooooooooooooooooooooooooooo++
+++ooooOoooOooooooO~-::::::::::::::::::::::::.  ~=: .:::::::::::::::::--=++OXOOOOOoo+
+++ooo    .:. +oooO~:.....................   :=oooo+-.  ...................-~+OXOOOoo
+++ooo    .- .+ooo+~....................   ~+ooooooooo=:   ..................:~+OOoo+
+++ooo    -   =oo+~:..................  :=ooooooooooooooo-.  ..................:~Oo++
++++oo+~~=o+~~++=-:................   ~+ooooooooooooooooooo=:  .......::::......-=o++
+++++++oooo++=~-:::::::::::::::..  :=ooooooooo=--+oooooooooooo-.  .::.::::::::::-~O++
++oo+===~---::::::::::::::::::   ~+ooooooooo~..~~.:=oooooooooooo=:  .:::::::::::-~O++
++o+~::::::::::::::::::::::.  :=ooooooooo+- -+OOOO+- -+oooooooooooo-. .:::::::::-=O++
++o+~:::::::::::--:::::::.  ~+ooooooooooo=:.-oOOOOo-.-=oooo+:~ooooooo=:  .::::::-=O++
++o+~:::::::::::---:::.  :=ooooooooooooooooo-.:==:.~oooo+~.:~: -+ooooooo-. .::::-=O++
+oo+~--------------:.  ~+ooooooooo~: :=ooooooo=:-=oooo+: -=+oo+~.:~ooooooo=:  :-~=Ooo
+ooo~------------:  :+ooooooooo+-.-+o+-.-+oooooooooo~.:=oooooo+=- -+ooooooooo-. :~Ooo
+ooo=----------.  ~oooooooooo+: ~oOOOOoo~ :oooooo+: -+ooooooo~..~oooooooooooooo=: :=o
++o+~:---------  -+oooooooooooo~.:=ooo=:.~ooooo~.:=ooooooo=- -+ooooooooooooooo++~. :~
++o+~::::::::---:. .~oooooooooooo=:.:.-=oooo+- -+ooooooo~..~oooooooo+++++++++=:  .==+
++o+~:::::::::::---.  -=++++oooooooo~ooooo~.:=ooooooo=- -+++++++++++++++++=-.  .:~O++
++o+~::::::::::----:::  .-+++++++++++++=: -=ooooooo~..~+++++++++++++++++=:  ..::-~O++
++o+~:::::::-~~----:::::.  -=+++++++++. -++ooooo=- -+++++++++++++++++=-.  .:::::-~O++
++o+~-------=MMo~---------:  .-++++++++~.:=+++~..~+++++++++++++++++=:  .:--------~O++
++o+~-----~oM~.HX=-----------.  :=+++++++=: : -+++++++++++++++++=-.  .-----------~O++
++o+~-----OH:   OH=------------:. .-++++++++~+++++++++++++++++=:  .::-~~~~-------~O++
++o+~---~XX.     +M+--------------.  :=++++++++++++++++++++=-.  .:----~~~~------~~O++
++o+~--=Ho        -Mo---------------:. .-++++++++++++++++=:  .:-------~~~--------~O++
++o+~-+M=          :HX~----------------.  :~++++++++++=-.  :----------~~~~------~~O++
++o+~OM-............:OH=-----------------:. .-++++++=:  .:------------~~~~------~~O++
++++=H-:::::::::::::::oM+~------------------.  :~=-.  :---------------~~~~------~~O++
++++~-::::::::::---::::=Mo~-------------------:.   .:-----------------~~~~------~=O++
+++O~+oooooooooOOOOOOOOOXMO======================~~~=====================~~~~~~~~o+++
++++o~~~~~~~~~~~===~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~===~~~~~~~~~~~===~~~~~~~oo+++
+++++o+~~~~~~~~~==~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~===~~~~~~~~~~~===~~~~~+oooo++
+++++++o++=~~~~~==~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~===~~~~~~~~~~~===~=+oooooo+++
+++++++++++oo+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++oo+++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+```
 
 # [Npx Commands](#table-of-contents)
 
@@ -107,14 +201,24 @@ Here is the list of available npx commands:
 This is the global `imgtotext` command. It provides access to all regular `imgtotext` commands and some more. It also provides basic command autocompletion upon receiving an uncomplete command name.
 
 #### Example use 1:
-Creating some big text using the `imgtotext-bigtext` command. (see below for more details)
-`npx imgtotext bigtext Hey man whats up`
+Creating a project template using the `imgtotext-template` command. (see below for more details)
+`npx imgtotext template myProjectName`
 
 #### Example use 2:
 Lists all available `imgtotext` commands. (As well as aliases)
 `npx imgtotext list`
 
-Coming soon (TODO)
+### To create a template page
+
+#### `npx imgtotext-template <projectName?>` | *`npx imgtotext-t <projectName?>`*
+
+This command creates a **modular** ImgToText template page. It accepts an optional project name as parameter.
+
+### To create a browser template page
+
+#### `npx imgtotext-browser-template <projectName?>` | *`npx imgtotext-bt <projectName?>`*
+
+This command creates a **non modular** ImgToText template page. It accepts an optional project name as parameter.
 
 ****
 ### [Credits](#table-of-contents)

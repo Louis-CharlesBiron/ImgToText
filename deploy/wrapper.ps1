@@ -10,6 +10,14 @@ $bins = "$root\dist\bins"
 $deploy = "$root\deploy"
 $terser = "$deploy\node_modules\.bin\terser"
 $version = (Get-Content "$dist\package.json" | ConvertFrom-Json).version
+$verisonedFiles = @("$bins\createProjectTemplate.js")
+
+#UPDATE VERSIONED FILES
+foreach ($filepath in $verisonedFiles) {
+(Get-Content $filepath) -replace '"imgtotext": "\^.*?"', @"
+`"imgtotext`": `"^$version`"
+"@ | Set-Content $filepath
+}
 
 # UPDATE DIST README
 Copy-Item "$root\readme.md" -Destination "$dist\readme.md" -Force
@@ -36,7 +44,7 @@ $c.wrapOrder.split(" ") | ForEach-Object {
 }
 $UMDCJSClasses = $UMDCJSClasses.TrimEnd(",")
 $mergedCode = "'use strict';`n$($mergedCode.Trim())"
-$mergedCodeESM = "import{ImageDisplay,Canvas,CDEUtils,TextDisplay}from'cdejs';$($mergedCodeESM.Trim())"
+$mergedCodeESM = "import{CDEUtils,FPSCounter,CanvasUtils,Color,_HasColor,GridAssets,TypingDevice,Mouse,Render,TextStyles,RenderStyles,Canvas,Anim,_BaseObj,AudioDisplay,ImageDisplay,TextDisplay,_DynamicColor,Pattern,_Obj,Shape,Gradient,FilledShape,Grid,Dot}from'cdejs';$($mergedCodeESM.Trim())"
 
 
 #CREATE MERGED FILE
@@ -76,7 +84,7 @@ Set-Content -Path $minifiedCodePathUMD -Value @"
 Set-Content -Path $minifiedCodePathESM -Value "// ImgToText ESM - v$version`n$(Get-Content $minifiedCodePathESM -Raw -Encoding UTF8)"
 
 #MINIFY BINS FILES
-$binFiles = @("global.js", "bigText.js")
+$binFiles = @("global.js", "createProjectTemplate.js", "createBrowserProjectTemplate.js", "openDocumentation.js")
 foreach ($filepath in $binFiles) {
     $filepath = "$bins\$filepath"
     Start-Process -FilePath $terser -ArgumentList "$filepath -o $bins\$((Get-Item $filepath).BaseName).min.js --compress --mangle"

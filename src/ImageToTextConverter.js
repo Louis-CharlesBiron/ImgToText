@@ -151,7 +151,7 @@ class ImageToTextConverter {
      * @param {String} text: The text to convert to big text
      * @param {String?} font: The font, size and styles to use 
      * @param {[scaleX, scaleY]?} scale: The X and Y scale of the base text (pre-convertion)
-     * @param {Color} color: The color of the base text (pre-convertion), can be used to add shading to the text
+     * @param {Color?} color: The color of the base text (pre-convertion), can be used to add shading to the text
      * @param {Boolean?} isFilled: Whether the text is filled or is an outline
      * @param {Number?} letterSpacing: The letter spacing in pixel of the base text (pre-convertion)
      * @param {Number?} wordSpacing: The word spacing in pixel of the base text (pre-convertion)
@@ -160,8 +160,10 @@ class ImageToTextConverter {
      * @param {TextStyles.STRETCHES?} fontStretch: The text streching 
      * @param {TextStyles.RENDERINGS?} textRendering: The text rendering method
      */
-    createBigText(text, font=null, scale=[...ImageToTextConverter.DEFAULT_TEXT_SCALE], color=null, isFilled=true, letterSpacing=8, wordSpacing=-20, fontVariantCaps=null, direction=null, fontStretch=TextStyles.STRETCHES.ULTRA_EXPANDED, textRendering=TextStyles.RENDERINGS.LEGIBLE) {
-        font ??= "normal 54px monospace"
+    createBigText(text, font=null, scale=[...ImageToTextConverter.DEFAULT_TEXT_SCALE], color=null, isFilled=true, letterSpacing=8, wordSpacing=-20, fontVariantCaps=null, direction=null, fontStretch=null, textRendering=TextStyles.RENDERINGS.LEGIBLE) {
+        font??="normal 54px monospace"
+        scale??=[...ImageToTextConverter.DEFAULT_TEXT_SCALE]
+
         this._CVS.stop()
         this.clear()
         this._media = new TextDisplay(text, [0,0], color, (render)=>render.textProfile1.update(font, letterSpacing, wordSpacing, fontVariantCaps, direction, fontStretch, null, TextStyles.ALIGNMENTS.START, TextStyles.BASELINES.TOP, textRendering), isFilled?Render.DRAW_METHODS.FILL:Render.DRAW_METHODS.STROKE, null, null, null, null, true)
@@ -182,7 +184,7 @@ class ImageToTextConverter {
         if (id && !usesOldInput) input.id = id
         input.accept = ImageDisplay.getSupportedHTMLAcceptValue()
         input.oninput=()=>{
-            const file = imgInput.files[0]
+            const file = input.files[0]
             if (CDEUtils.isFunction(onInputCB)) onInputCB(file, this)
             if (file) {
                 if (ImageDisplay.isVideoFormatSupported(file)) this.loadMedia(ImageDisplay.loadVideo(file))
@@ -206,50 +208,6 @@ class ImageToTextConverter {
         this._CVS.removeAllObjects()
         this._CVS.clear()
     }
-
-    /**
-    TODO
-        getBestResolution()
-
-        ---GIVEN---
-        - letterSpacing (0px)
-        - line height (18px)
-        - font-size (16px)
-        - groupingSize (5x5)
-
-        - media width
-        - media height
-
-        (MAYBE) a max width/height
-
-        return the best version of the convertion
-
-
-
-
-
-
-
-
-
-
-
-
-        ----------------- N O T E S-----------------------------
-        
-        ==========FOR BEST RENDERING WITH GD ICON==========
-        --- DEFAULTS ---
-        letterSpacing: 0
-        line height: 18
-        font-size: 16
-        init img size: 250x250
-        groupingSize: 5x5
-
-        --- CHANGING GROUPING SIZE ---
-        groupingSize: 7x7 -> 6x6 -> 5x5 -> 4x4 -> 3x3 -> 2x2
-        Aspect ratio kept at [89%, 45%] -> [91%, 45%] -> [92%, 45%] -> [91%, 45%] -­> [91%, 45%] -> [89%, 45%]
-
-    */
 
     get CVS() {return this._CVS}
     get cvs() {return this._CVS.cvs}

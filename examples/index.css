@@ -49,6 +49,7 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear,input[type=
     outline: none;
     border: none;
     font-family: monospace;
+    white-space: nowrap;
 
     font-size: 16px;
     letter-spacing: 0px;

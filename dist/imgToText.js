@@ -1,21 +1,23 @@
 'use strict';
 class ImageToTextConverter {
     static DEFAULT_CHARACTER_SETS = {
-        VERY_LOW:[..." .:"],
-        DOTS:[..." .·':"],
-        LOW:[..." .:-~=+oOXHM"],// 13 shades
+        VERY_LOW:[" ",".",":"],
+        DOTS:[" ",".","·","'",":"],
+        SIMPLE:[" ",".",":","-","~","=","Ξ","#"],
+        LOW:[" ",".",":","-","~","=","+","o","O","X","H","M"],
         LOW_LARGE:["  "," ."," :"," -"," ~"," ="," +"," o"," O"," X"," H"," M"],
-        LOW_REVERSED:[..."MHXOo+=~-:. "],
-        MIDDLE:[..." .:-~=+oOXHMB8$W%@#░▒▓█"],
-        HIGH_RANGE:[..." ˙.·';:,-^~=+coOXHMB8$W%@#░▒▓█"],
-        HIGH_CENTRAL_SHADING:[..."MWVXvuo+;:-`. .`-:;+ouvXVMW"],
-        HIGH_CENTRAL_SHADING_REVERSED:[..." .,:;~-+=oO0BDWMΞ#@█@#ΞMWDB0Oo=+-~;:,. "],
-        TEST_ASCII:["░","▒","▓","█"],
-        TEST_ASCII2:[" ","░","▒","▓","█"],
+        LOW_REVERSED:["M","H","X","O","o","+","=","~","-",":","."," "],
+        MIDDLE:[" ",".",":","-","~","=","+","o","O","X","H","M","B","8","$","W","%","@","#","░","▒","▓","█"],
+        HIGH_RANGE:[" ",".",",","-","~","=",":",";","+","c","o","O","X","H","M","B","$","Ξ","#","@","░","▒","▓","█"],
+        HIGH_CENTRAL_SHADING:["M","W","V","X","v","u","o","+",";",":","-","`","."," ",".","`","-",":",";","+","o","u","v","X","V","W","M"],
+        HIGH_CENTRAL_SHADING_REVERSED:[" ",".",",",":",";","~","-","+","=","o","O","0","B","D","W","M","Ξ","#","@","█","@","#","Ξ","M","W","D","B","0","O","o","=","+","-","~",";",":",",","."," "],
+        BRIGHT_ASCII:["░","▒","▓","█"],
+        ASCII:[" ","░","▒","▓","█"],
     }
     static DEFAULT_CHARACTER_SET = ImageToTextConverter.DEFAULT_CHARACTER_SETS.LOW
     static DEFAULT_CVS_SIZE = [...ImageDisplay.RESOLUTIONS.MAX]
     static DEFAULT_MEDIA_SIZE = ["92%", "45%"]
+    static DEFAULT_TEXT_SCALE = [1.92, 1.45]
     static DEFAULT_MEDIA_ERROR_CALLBACK = (errorCode, media)=>console.warn("Error while loading media:", ImageDisplay.getErrorFromCode(errorCode), "("+media+")")
 
     #cachedRange = null
@@ -65,8 +67,8 @@ class ImageToTextConverter {
     }
 
     // groups the media pixels according to pxGroupingSize and returns the y and the average value of each
-    #mapPixels(pxGroupingSize) {
-        let CVS = this._CVS, media = this._media, width = (media.width>>0)>CVS.width?CVS.width:(media.width>>0), height = (media.height>>0)>CVS.height?CVS.height:(media.height>>0), data = CVS.ctx.getImageData(0, 0, width, height).data,
+    #mapPixels(pxGroupingSize=this._pxGroupingSize) {
+        let CVS = this._CVS, media = this._media, mediaSize = media.trueSize, width = (mediaSize[0]>>0)>CVS.width?CVS.width:(mediaSize[0]>>0), height = (mediaSize[0]>>0)>CVS.height?CVS.height:(mediaSize[1]>>0), data = CVS.ctx.getImageData(0, 0, width, height).data,
             x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize**2)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, bigPixels = [], minDif = CDEUtils.getAcceptableDiff
 
         for (y=0;y<height;y+=pxGroupingSize) {
@@ -120,13 +122,14 @@ class ImageToTextConverter {
     }
 
     /**
-     * Loads a media and converts it. Replaces any other curret media, if any.
+     * Loads a media and converts it. Replaces any other current media, if any.
      * @param {ImageDisplay.SOURCE_TYPES} sourceMedia: The media to convert
      * @param {[width, height]} size: The size of the media
-     * @param {Function?} readyCB: Function called when the media is loaded
+     * @param {[ [startX, startY], [endX, endY] ]} croppingPositions: The source cropping positions. Delimits a rectangle which indicates the source drawing area to draw from
      * @param {Function?} errorCB: Function called upon any error loading the media
+     * @param {Function?} readyCB: Function called when the media is loaded
      */
-    loadMedia(sourceMedia, size=[...ImageToTextConverter.DEFAULT_MEDIA_SIZE], readyCB=null, errorCB=ImageToTextConverter.DEFAULT_MEDIA_ERROR_CALLBACK) {
+    loadMedia(sourceMedia, size=[...ImageToTextConverter.DEFAULT_MEDIA_SIZE], croppingPositions=null, errorCB=ImageToTextConverter.DEFAULT_MEDIA_ERROR_CALLBACK, readyCB=null) {
         this.clear()
 
         this._media = new ImageDisplay(sourceMedia, [0,0], size, errorCB, (img)=>{
@@ -138,7 +141,35 @@ class ImageToTextConverter {
             if (CDEUtils.isFunction(readyCB)) readyCB(this)
         }, null, null, true)
 
+        this._media.sourceCroppingPositions = croppingPositions
+
         this._CVS.add(this._media)
+    }
+
+    /**
+     * Loads custom text and converts it to big text. Replaces any other current media, if any.
+     * @param {String} text: The text to convert to big text
+     * @param {String?} font: The font, size and styles to use 
+     * @param {[scaleX, scaleY]?} scale: The X and Y scale of the base text (pre-convertion)
+     * @param {Color?} color: The color of the base text (pre-convertion), can be used to add shading to the text
+     * @param {Boolean?} isFilled: Whether the text is filled or is an outline
+     * @param {Number?} letterSpacing: The letter spacing in pixel of the base text (pre-convertion)
+     * @param {Number?} wordSpacing: The word spacing in pixel of the base text (pre-convertion)
+     * @param {TextStyles.CAPS_VARIANTS?} fontVariantCaps: Specifies alternative capitalization
+     * @param {TextStyles.DIRECTIONS?} direction: The text direction
+     * @param {TextStyles.STRETCHES?} fontStretch: The text streching 
+     * @param {TextStyles.RENDERINGS?} textRendering: The text rendering method
+     */
+    createBigText(text, font=null, scale=[...ImageToTextConverter.DEFAULT_TEXT_SCALE], color=null, isFilled=true, letterSpacing=8, wordSpacing=-20, fontVariantCaps=null, direction=null, fontStretch=null, textRendering=TextStyles.RENDERINGS.LEGIBLE) {
+        font??="normal 54px monospace"
+        scale??=[...ImageToTextConverter.DEFAULT_TEXT_SCALE]
+
+        this._CVS.stop()
+        this.clear()
+        this._media = new TextDisplay(text, [0,0], color, (render)=>render.textProfile1.update(font, letterSpacing, wordSpacing, fontVariantCaps, direction, fontStretch, null, TextStyles.ALIGNMENTS.START, TextStyles.BASELINES.TOP, textRendering), isFilled?Render.DRAW_METHODS.FILL:Render.DRAW_METHODS.STROKE, null, null, null, null, true)
+        this._CVS.add(this._media)
+        this._media.scale = scale
+        this.generate()
     }
 
     /**
@@ -153,7 +184,7 @@ class ImageToTextConverter {
         if (id && !usesOldInput) input.id = id
         input.accept = ImageDisplay.getSupportedHTMLAcceptValue()
         input.oninput=()=>{
-            const file = imgInput.files[0]
+            const file = input.files[0]
             if (CDEUtils.isFunction(onInputCB)) onInputCB(file, this)
             if (file) {
                 if (ImageDisplay.isVideoFormatSupported(file)) this.loadMedia(ImageDisplay.loadVideo(file))
@@ -177,50 +208,6 @@ class ImageToTextConverter {
         this._CVS.removeAllObjects()
         this._CVS.clear()
     }
-
-    /**
-    TODO
-        getBestResolution()
-
-        ---GIVEN---
-        - letterSpacing (0px)
-        - line height (18px)
-        - font-size (16px)
-        - groupingSize (5x5)
-
-        - media width
-        - media height
-
-        (MAYBE) a max width/height
-
-        return the best version of the convertion
-
-
-
-
-
-
-
-
-
-
-
-
-        ----------------- N O T E S-----------------------------
-        
-        ==========FOR BEST RENDERING WITH GD ICON==========
-        --- DEFAULTS ---
-        letterSpacing: 0
-        line height: 18
-        font-size: 16
-        init img size: 250x250
-        groupingSize: 5x5
-
-        --- CHANGING GROUPING SIZE ---
-        groupingSize: 7x7 -> 6x6 -> 5x5 -> 4x4 -> 3x3 -> 2x2
-        Aspect ratio kept at [89%, 45%] -> [91%, 45%] -> [92%, 45%] -> [91%, 45%] -­> [91%, 45%] -> [89%, 45%]
-
-    */
 
     get CVS() {return this._CVS}
     get cvs() {return this._CVS.cvs}

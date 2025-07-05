@@ -11,7 +11,29 @@
 
 **ImgToText is a concise library that converts any image/video into customizable text usable!**
 
-
+<span style="font-size:10px;font-family:monospace;">
+                                                                     
+            .oXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX= 
+            OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM-   
+            XMMM~........................................OMMM~  
+            XMMM-                         .~++~.         OMMM~   
+            XMMM-                        :HMMMMM-        OMMM~                          MMMMMMMM                                                               MMMMMMMMMM                                        
+            XMMM-                        -MMMMMM=        OMMM~                        MMMMMMMMM                                                               MMMMMMMMMM                                         
+            XMMM-                         -oXXO~         OMMM~                         MMM               MMMMMMMM        MMMMMMMMMM         MMMMMMM               MMM          MMMMMMMMMMM        MMMMMMMMMM     
+            XMMM-       +O:                              OMMM~                         MMMMM            MMMMMMMMMM       MMMMMMMMMMM      MMMMMMMMMM              MMM          MMMMMMMMMMM       MMMMMMMMMMM     
+            XMMM-     +HMMMX=                            OMMM~                          MMMMMMMM        MMM    MMM       MMM MMM MMM      MMM    MMM              MMM          MMMM MMM MM       MMM   MMMM      
+            XMMM-   =MMMMMMMMMo.            .+XMX=.      OMMM~                             MMMMMM      MMMM    MMM       MM  MM  MMM      MMMMMMMMMM              MMM          MMM  MM  MM       MMMMMMMMM       
+            XMMM-.=HMMMMMMMMMMMMX-       -oHMMMMMMMX=.   OMMM~                                MMM       MMM    MMM       MM  MM  MMM      MMM                     MMM          MMM  MM  MM       MMMMMMMMM    
+            XMMMoMMMMMMMMMMMMMMMMMH=..~OMMMMMMMMMMMMMMX=.OMMM~                         MMM  MMMMM       MMMMMMMMMM       MM  MM  MMM      MMMMMMMMMM              MMM          MMM  MM  MM       MMMMMM       
+            XMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM~                         MMMMMMMMM         MMMMMMMM        MM  MM  MMM       MMMMMMMMM           MMMMMMMMMM      MMM  MM  MM       MMMMMMMMMM   
+            XMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM~                                                                                                                                   MMM   MMMMM 
+            XMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM~                                                                                                                                   MMMMMMMMMM
+            XMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM~                                                                                                                                   MMMMMMMMM
+            XMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM~
+            XMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM~
+            OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM-
+            .oHMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMHX= 
+</span>
 
 
 # Table of Contents
@@ -44,7 +66,7 @@ The ImageToTextConverter class allows the full convertion and customization of i
 ###### - `new ImageToTextConverter(resultCB, sourceMedia?, maxMediaInputSize?, pxGroupingSize?, charSet?, maxRefreshRate?)`
 - **resultCB** -> A callback called on each convertion, its only parameter is the text result of the latest convertion . `(text)=>{...}`
 - **sourceMedia**? -> The image/video to convert. One of [`ImageDisplay.SOURCE_TYPES`](https://github.com/Louis-CharlesBiron/canvasDotEffect?tab=readme-ov-file#table-of-contents).
-- **maxMediaInputSize**? -> The canvas or canvas size on which medias will be drawn. Either a size array *`[width, height]`*, a *`HTMLCanvasElement`* (to see medias before convertion), a *`OffscreenCanvas`*, or a [*cdejs `Canvas`*](https://github.com/Louis-CharlesBiron/canvasDotEffect?tab=readme-ov-file#table-of-contents). Defaults to about `[3840, 2160]`.
+- **maxMediaInputSize**? -> The canvas or canvas size on which medias will be drawn. Either a size array *`[width, height]`*, a *`HTMLCanvasElement`* (to see medias before convertion), a *`OffscreenCanvas`*, or a [*imgtotext `Canvas`*](https://github.com/Louis-CharlesBiron/canvasDotEffect?tab=readme-ov-file#table-of-contents). Defaults to about `[3840, 2160]`.
 - **pxGroupingSize**? -> The pixel output resolution. E.g: `1` converts pixels to characters at a 1:1 ratio (one character per media pixel), and `5` converts pixels to chars at a 25:1 ratio (one character per 5x5 pixels of the original media). Defaults to `5`.
 - **charSet**? -> The characters used to draw the image using text, going from least visible to most visible. Either a `String` or an `Array`. Defaults to `[" ", ".", ":", "-", "~", "=", "+", "o" , "O" , "X", "H", "M"]`.
 - **maxRefreshRate**? -> The aimed convertions per second (mostly for videos). Defaults to `30`fps.
@@ -58,9 +80,9 @@ The ImageToTextConverter class allows the full convertion and customization of i
 ```js
     // Loading and converting a new image
     converter.loadMedia(
-        "someImg.png",                          // The media path
-        [100, 100],                             // The rendered size of the media
-        [[0,0], ["50%", "100%"]]                // Cropping to only use the left half of the media 
+        "someImg.png",    // The media path
+        [100, 100],       // The rendered size of the media
+        [[0,0], ["50%", "100%"]]     // Cropping to only use the left half of the media 
         ()=>console.log("Image loaded!"),       // Callback called upon media load
         ()=>console.warn("Error loading image!")// Callback called upon error loading media
     )
@@ -107,13 +129,13 @@ Coming soon (TODO)
 ```
    MMMMMMMM    MMMMMMMM       MMMMMMMMM      MMMMMMMM       MMMMMMMM     
   MMMMMMMMM    MMMMMMMMM      MMMMMMMMM      MMMMMMMM      MMMMMMMMM     
- MMMM    MM    MMM   MMMM     MMM                 MMM      MMM           
- MMM           MMM    MMMM    MMM                 MMM      MMM           
+ MMMM    MM    MMM   MMMM     MMM      MMM      MMM           
+ MMM           MMM    MMMM    MMM      MMM      MMM           
 MMMM           MMM     MMM    MMMMMMMMM           MMM      MMMMMM        
-MMM            MMM     MMM    MMMMMMMMM           MMM       MMMMMMM      
-MMMM           MMM     MMM    MMM                 MMM         MMMMMM     
- MMM           MMM    MMMM    MMM                 MMM            MMMM    
- MMMM          MMM   MMMM     MMM            M   MMMM            MMMM    
+MMM MMM     MMM    MMMMMMMMM           MMM       MMMMMMM      
+MMMM           MMM     MMM    MMM      MMM         MMMMMM     
+ MMM           MMM    MMMM    MMM      MMM MMMM    
+ MMMM          MMM   MMMM     MMM M   MMMM MMMM    
  MMMMMMMMMM    MMMMMMMMM      MMMMMMMMM      MMMMMMMM     MMMMMMMMMM     
    MMMMMMMM    MMMMMMMM       MMMMMMMMM      MMMMMMM      MMMMMMMMM
 ```
@@ -179,14 +201,24 @@ Here is the list of available npx commands:
 This is the global `imgtotext` command. It provides access to all regular `imgtotext` commands and some more. It also provides basic command autocompletion upon receiving an uncomplete command name.
 
 #### Example use 1:
-Creating some big text using the `imgtotext-bigtext` command. (see below for more details)
-`npx imgtotext bigtext Hey man whats up`
+Creating a project template using the `imgtotext-template` command. (see below for more details)
+`npx imgtotext template myProjectName`
 
 #### Example use 2:
 Lists all available `imgtotext` commands. (As well as aliases)
 `npx imgtotext list`
 
-Coming soon (TODO)
+### To create a template page
+
+#### `npx imgtotext-template <projectName?>` | *`npx imgtotext-t <projectName?>`*
+
+This command creates a **modular** ImgToText template page. It accepts an optional project name as parameter.
+
+### To create a browser template page
+
+#### `npx imgtotext-browser-template <projectName?>` | *`npx imgtotext-bt <projectName?>`*
+
+This command creates a **non modular** ImgToText template page. It accepts an optional project name as parameter.
 
 ****
 ### [Credits](#table-of-contents)

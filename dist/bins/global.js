@@ -4,7 +4,12 @@ import {dirname, join} from "path"
 import {createInterface} from "readline"
 
 const commands = {
-        "bigtext": "bigText.min.js",
+        "template": "createProjectTemplate.min.js",
+        "t": "createProjectTemplate.min.js",
+        "browser-template": "createBrowserProjectTemplate.min.js",
+        "bt": "createBrowserProjectTemplate.min.js",
+        "doc": "openDocumentation.min.js",
+        "documentation": "openDocumentation.min.js",
     }, customCommands = ["list"], libName = "imgtotext"
 
 function getCommand(reqCom, params) {
