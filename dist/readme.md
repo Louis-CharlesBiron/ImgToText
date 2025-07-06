@@ -54,7 +54,7 @@
 
 2. **In a JS file, create a new ImageToTextConverter instance.**
 ```js
-    // Converts the image ("someImg.png") and loggs it in the console
+    // Converts the image ("someImg.png") and logs it in the console
     const converter = new ImageToTextConverter((text)=>console.log(text), "someImg.png")
 ```
 #
@@ -92,6 +92,23 @@ The ImageToTextConverter class allows the full convertion and customization of i
     converter.loadMedia(ImageDisplay.loadCamera())
 ```
 
+### **To format the text output of a convertion** use the *static* `formatText` function:
+###### - formatText(text, outputFormatingMethod?)
+```js
+    // A dummy converter
+    const converter = new ImageToTextConverter((text)=>{
+
+        // Regular output (raw)
+        console.log(text)
+
+        // Adapts the output to properly render in a Markdown environment
+        console.log(ImageToTextConverter.formatText(text), ImageToTextConverter.OUTPUT_FORMATS.MARKDOWN)
+
+        // Adapts the output to properly render in a HTML environment
+        console.log(ImageToTextConverter.formatText(text), ImageToTextConverter.OUTPUT_FORMATS.HTML)
+    })
+```
+
 ### **To force a convertion** use the `generate` function:
 ###### - generate()
 ```js
@@ -127,17 +144,16 @@ Coming soon (TODO)
 - camera/video example (gif)
 
 ```
-   MMMMMMMM    MMMMMMMM       MMMMMMMMM      MMMMMMMM       MMMMMMMM     
-  MMMMMMMMM    MMMMMMMMM      MMMMMMMMM      MMMMMMMM      MMMMMMMMM     
- MMMM    MM    MMM   MMMM     MMM      MMM      MMM           
- MMM           MMM    MMMM    MMM      MMM      MMM           
-MMMM           MMM     MMM    MMMMMMMMM           MMM      MMMMMM        
-MMM MMM     MMM    MMMMMMMMM           MMM       MMMMMMM      
-MMMM           MMM     MMM    MMM      MMM         MMMMMM     
- MMM           MMM    MMMM    MMM      MMM MMMM    
- MMMM          MMM   MMMM     MMM M   MMMM MMMM    
- MMMMMMMMMM    MMMMMMMMM      MMMMMMMMM      MMMMMMMM     MMMMMMMMMM     
-   MMMMMMMM    MMMMMMMM       MMMMMMMMM      MMMMMMM      MMMMMMMMM
+   MMMMMMMM     MMMMMMMM        MMMMMMMMM      MMMMMMMM       MMMMMMMM      
+ MMMMMMMMMM     MMMMMMMMMM      MMMMMMMMM      MMMMMMMM      MMMMMMMMM      
+ MMMM           MMM   MMMM      MMM                 MMM      MMM            
+MMMM            MMM    MMMM     MMM                 MMM      MMMMMM         
+MMMM            MMM     MMM     MMMMMMMM            MMM       MMMMMMMM      
+MMMM            MMM    MMMM     MMM                 MMM          MMMMMM     
+ MMM            MMM    MMMM     MMM                 MMM             MMM     
+ MMMMM   MM     MMM MMMMMM      MMM            MM  MMMM      MM    MMMM     
+  MMMMMMMMM     MMMMMMMMM       MMMMMMMMM      MMMMMMM       MMMMMMMMMM     
+    MMMMMM                                      MMMM          MMMMMM        
 ```
 
 ![GD](https://static.wikia.nocookie.net/logopedia/images/4/41/Geometry_Dash_Icon.svg/revision/latest?cb=20220220121501)

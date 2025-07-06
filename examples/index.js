@@ -1,9 +1,9 @@
 //const {ImageToTextConverter} = window.ImgToText, {ImageDisplay} = window.CDE
 
-const converter = new ImageToTextConverter((text)=>showGeneratedText.value=text, null, document.getElementById("imgInputDisplay"))
+const converter = new ImageToTextConverter((text)=>showGeneratedText.value=ImageToTextConverter.formatText(text, ImageToTextConverter.OUTPUT_FORMATS.NON_BREAKING_SPACES), null, document.getElementById("imgInputDisplay"))
 
 
-converter.createBigText("Some Img", "32px monospace", [2, 1.25])
+converter.createBigText("CDEJS", "54px monospace", [2, 1.25])
 
 // FILE INPUT
 converter.createHTMLFileInput(imgInput)

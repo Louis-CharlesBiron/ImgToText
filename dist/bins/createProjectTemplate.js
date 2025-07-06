@@ -62,7 +62,7 @@ writeFileSync(join(destination, "index.css"), `html, body {
     font-size: 16px;
     letter-spacing: 0px;
     line-height: 18px;
-    white-space: nowrap;
+    white-space: pre;
 }`)
 
 // Create index.js
