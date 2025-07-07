@@ -143,33 +143,38 @@ Coming soon (TODO)
 - text example
 - camera/video example (gif)
 
+# Converting some text
 ```
-   MMMMMMMM     MMMMMMMM        MMMMMMMMM      MMMMMMMM       MMMMMMMM      
- MMMMMMMMMM     MMMMMMMMMM      MMMMMMMMM      MMMMMMMM      MMMMMMMMM      
- MMMM           MMM   MMMM      MMM                 MMM      MMM            
-MMMM            MMM    MMMM     MMM                 MMM      MMMMMM         
-MMMM            MMM     MMM     MMMMMMMM            MMM       MMMMMMMM      
-MMMM            MMM    MMMM     MMM                 MMM          MMMMMM     
- MMM            MMM    MMMM     MMM                 MMM             MMM     
- MMMMM   MM     MMM MMMMMM      MMM            MM  MMMM      MM    MMMM     
-  MMMMMMMMM     MMMMMMMMM       MMMMMMMMM      MMMMMMM       MMMMMMMMMM     
-    MMMMMM                                      MMMM          MMMMMM        
-```
-
-![GD](https://static.wikia.nocookie.net/logopedia/images/4/41/Geometry_Dash_Icon.svg/revision/latest?cb=20220220121501)
-
+   MMMMMMMM     MMMMMMMM        MMMMMMMMM      MMMMMMMM       MMMMMMMM      
+ MMMMMMMMMM     MMMMMMMMMM      MMMMMMMMM      MMMMMMMM      MMMMMMMMM      
+ MMMM           MMM   MMMM      MMM                 MMM      MMM            
+MMMM            MMM    MMMM     MMM                 MMM      MMMMMM         
+MMMM            MMM     MMM     MMMMMMMM            MMM       MMMMMMMM      
+MMMM            MMM    MMMM     MMM                 MMM          MMMMMM     
+ MMM            MMM    MMMM     MMM                 MMM             MMM     
+ MMMMM   MM     MMM MMMMMM      MMM            MM  MMMM      MM    MMMM     
+  MMMMMMMMM     MMMMMMMMM       MMMMMMMMM      MMMMMMM       MMMMMMMMMM     
+    MMMMMM                                      MMMM          MMMMMM
 ```
 
-Settings used:
+### Settings used (All defaults):
 
-    Media width:  100%
-    Media height: 40%
-    Pixel Grouping Size: 3x3
-    Character set: [ " ", ".", ":", "-", "~", "=", "+", "o", "O", "X", "H", "M" ]
-
-    JS code: TODO
+- Text scale-x: 2
+- Text scale-y: 1.25
+- Pixel Grouping Size: 5x5
+- Character set: [ " ", ".", ":", "-", "~", "=", "+", "o", "O", "X", "H", "M" ]
 
 
+### JS code:
+```js
+new ImageToTextConverter((text)=>{console.log(text)}, "CDEJS")
+``` 
+
+# Converting an image:
+
+![Icon of Geometry Dash](https://static.wikia.nocookie.net/logopedia/images/4/41/Geometry_Dash_Icon.svg/revision/latest?cb=20220220121501)
+
+```
 ++++ooooooooooo++ooooooooooooooooooooooooooooo~::~+ooooooooooooooooooooooooooooooo++
 ++ooooOoooOooooooO~-::::::::::::::::::::::::.  ~=: .:::::::::::::::::--=++OXOOOOOoo+
 ++ooo    .:. +oooO~:.....................   :=oooo+-.  ...................-~+OXOOOoo
@@ -205,6 +210,41 @@ ooo=----------.  ~oooooooooo+: ~oOOOOoo~ :oooooo+: -+ooooooo~..~oooooooooooooo=:
 ++++++++++oo+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++oo+++++++++++
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ```
+
+### Settings used:
+
+- Media width:  100%
+- Media height: 40%
+- Pixel Grouping Size: 3x3
+- Character set (Default): [ " ", ".", ":", "-", "~", "=", "+", "o", "O", "X", "H", "M" ]
+
+
+### JS code:
+```js
+        new ImageToTextConverter(
+            (text)=>{console.log(text)},
+            "https://static.wikia.nocookie.net/logopedia/images/4/41/Geometry_Dash_Icon.svg",
+            null,
+            3
+        )
+``` 
+
+# Converting a video:
+
+TODO
+
+### Settings used:
+
+- Media width: 
+- Media height: 
+- Pixel Grouping Size: 
+- Character set (Default): 
+
+
+### JS code:
+```js
+
+``` 
 
 # [Npx Commands](#table-of-contents)
 
