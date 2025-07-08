@@ -138,38 +138,6 @@ The ImageToTextConverter class allows the full convertion and customization of i
 
 # [Visual Examples](#table-of-contents)
 
-Coming soon (TODO)
-- img example
-- text example
-- camera/video example (gif)
-
-# Converting some text
-```
-   MMMMMMMM     MMMMMMMM        MMMMMMMMM      MMMMMMMM       MMMMMMMM      
- MMMMMMMMMM     MMMMMMMMMM      MMMMMMMMM      MMMMMMMM      MMMMMMMMM      
- MMMM           MMM   MMMM      MMM                 MMM      MMM            
-MMMM            MMM    MMMM     MMM                 MMM      MMMMMM         
-MMMM            MMM     MMM     MMMMMMMM            MMM       MMMMMMMM      
-MMMM            MMM    MMMM     MMM                 MMM          MMMMMM     
- MMM            MMM    MMMM     MMM                 MMM             MMM     
- MMMMM   MM     MMM MMMMMM      MMM            MM  MMMM      MM    MMMM     
-  MMMMMMMMM     MMMMMMMMM       MMMMMMMMM      MMMMMMM       MMMMMMMMMM     
-    MMMMMM                                      MMMM          MMMMMM
-```
-
-### Settings used (All defaults):
-
-- Text scale-x: 2
-- Text scale-y: 1.25
-- Pixel Grouping Size: 5x5
-- Character set: [ " ", ".", ":", "-", "~", "=", "+", "o", "O", "X", "H", "M" ]
-
-
-### JS code:
-```js
-new ImageToTextConverter((text)=>{console.log(text)}, "CDEJS")
-``` 
-
 # Converting an image:
 
 ![Icon of Geometry Dash](https://static.wikia.nocookie.net/logopedia/images/4/41/Geometry_Dash_Icon.svg/revision/latest?cb=20220220121501)
@@ -221,29 +189,68 @@ ooo=----------.  ~oooooooooo+: ~oOOOOoo~ :oooooo+: -+ooooooo~..~oooooooooooooo=:
 
 ### JS code:
 ```js
+        // Creating a default ImageToTextConverter
         new ImageToTextConverter(
-            (text)=>{console.log(text)},
-            "https://static.wikia.nocookie.net/logopedia/images/4/41/Geometry_Dash_Icon.svg",
-            null,
-            3
+            (text)=>{console.log(text)}, // resultCB: function called upon a convertion, here simply logging to console
+            "https://static.wikia.nocookie.net/logopedia/images/4/41/Geometry_Dash_Icon.svg", // sourceMedia: the source of the image to convert
+            null, // maxMediaInputSize: null so default value assigned ( [3840, 2160] )
+            3     // pxGroupingGroup: grouping pixels 3x3 
         )
 ``` 
 
-# Converting a video:
+# Converting some text
+"cdejs"
+```
+   MMMMMMMM     MMMMMMMM        MMMMMMMMM      MMMMMMMM       MMMMMMMM      
+ MMMMMMMMMM     MMMMMMMMMM      MMMMMMMMM      MMMMMMMM      MMMMMMMMM      
+ MMMM           MMM   MMMM      MMM                 MMM      MMM            
+MMMM            MMM    MMMM     MMM                 MMM      MMMMMM         
+MMMM            MMM     MMM     MMMMMMMM            MMM       MMMMMMMM      
+MMMM            MMM    MMMM     MMM                 MMM          MMMMMM     
+ MMM            MMM    MMMM     MMM                 MMM             MMM     
+ MMMMM   MM     MMM MMMMMM      MMM            MM  MMMM      MM    MMMM     
+  MMMMMMMMM     MMMMMMMMM       MMMMMMMMM      MMMMMMM       MMMMMMMMMM     
+    MMMMMM                                      MMMM          MMMMMM
+```
 
-TODO
+### Settings used (All defaults):
 
-### Settings used:
-
-- Media width: 
-- Media height: 
-- Pixel Grouping Size: 
-- Character set (Default): 
+- Text scale-x: 2
+- Text scale-y: 1.25
+- Pixel Grouping Size: 5x5
+- Character set: [ " ", ".", ":", "-", "~", "=", "+", "o", "O", "X", "H", "M" ]
+- Font: 54px monospace
 
 
 ### JS code:
 ```js
+    // Creating a default ImageToTextConverter and loading the text "CDEJS" to be converted
+    new ImageToTextConverter((text)=>{console.log(text)}, "CDEJS")
+``` 
 
+# Converting a video:
+![Non-converted video](examples/img/exampleRaw.gif)
+
+
+![Converted video](examples/img/exampleConverted.gif)
+
+
+
+### Settings used:
+
+- Media width:  100%
+- Media height (Default): 45%
+- Pixel Grouping Size: 3x3
+- Character set (Default): [ " ", ".", ":", "-", "~", "=", "+", "o", "O", "X", "H", "M" ]
+
+
+### JS code:
+```js
+    // Creating an ImageToTextConverter with a pixel grouping size of 3
+    const converter = new ImageToTextConverter((text)=>{console.log(text)}, null, null, 3)
+    
+    // Loading the video to be converted with specific size
+    converter.loadMedia("./img/exampleRaw.mp4", ["100%", "45%"])
 ``` 
 
 # [Npx Commands](#table-of-contents)

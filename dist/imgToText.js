@@ -2,22 +2,38 @@
 class ImageToTextConverter {
     static DEFAULT_CHARACTER_SETS = {
         VERY_LOW:[" ",".",":"],
-        DOTS:[" ",".","·","'",":"],
-        SIMPLE:[" ",".",":","-","~","=","Ξ","#"],
+        VERY_LOW_REVERSED:[":","."," "],
         LOW:[" ",".",":","-","~","=","+","o","O","X","H","M"],
         LOW_LARGE:["  "," ."," :"," -"," ~"," ="," +"," o"," O"," X"," H"," M"],
         LOW_REVERSED:["M","H","X","O","o","+","=","~","-",":","."," "],
-        MIDDLE:[" ",".",":","-","~","=","+","o","O","X","H","M","B","8","$","W","%","@","#","░","▒","▓","█"],
-        HIGH_RANGE:[" ",".",",","-","~","=",":",";","+","c","o","O","X","H","M","B","$","Ξ","#","@","░","▒","▓","█"],
-        HIGH_CENTRAL_SHADING:["M","W","V","X","v","u","o","+",";",":","-","`","."," ",".","`","-",":",";","+","o","u","v","X","V","W","M"],
-        HIGH_CENTRAL_SHADING_REVERSED:[" ",".",",",":",";","~","-","+","=","o","O","0","B","D","W","M","Ξ","#","@","█","@","#","Ξ","M","W","D","B","0","O","o","=","+","-","~",";",":",",","."," "],
-        BRIGHT_ASCII:["░","▒","▓","█"],
+        MIDDLE:[" ",".",":","-","~","=","+","o","O","X","H","M","B","8","$","W","%","@","#"],
+        MIDDLE_REVERSED:["#","@","%","W","$","8","B","M","H","X","O","o","+","=","~","-",":","."," "],
+        MIDDLE_PATCHY:[" ",".",":","-","~","=","+","o","O","X","H","M","B","8","$","W","%","@","#","░","▒","▓","█"],
+        MIDDLE_PATCHY_REVERSED:["█","▓","▒","░","#","@","%","W","$","8","B","M","H","X","O","o","+","=","~","-",":","."," "],
+        HIGH:[" ",".",",","-","~","=",":",";","+","c","o","O","X","H","M","B","$","Ξ","#","@","░","▒","▓","█"],
+        HIGH_REVERSED:["█","▓","▒","░","@","#","Ξ","$","B","M","H","X","O","o","c","+",";",":","=","~","-",",","."," "],
+        HIGH_CENTRAL_SHADING:[,"▓","▒","░","@","#","Ξ","$","B","M","H","X","O","o","c","+",";",":","=","~","-",",","."," ",".",",","-","~","=",":",";","+","c","o","O","X","H","M","B","$","Ξ","#","@","░","▒","▓","█"],
+        HIGH_OUTER_SHADING:[" ",".",",","-","~","=",":",";","+","c","o","O","X","H","M","B","$","Ξ","#","@","░","▒","▓","█","▓","▒","░","@","#","Ξ","$","B","M","H","X","O","o","c","+",";",":","=","~","-",",","."," "],
         ASCII:[" ","░","▒","▓","█"],
+        ASCII_REVERSED:["█","▓","▒","░"," "],
+        BRIGHT_ASCII:["░","▒","▓","█"],
+        BRIGHT_ASCII_REVERSED:["█","▓","▒","░"],
+        LINES:[" ","─","━","═","│","║","┃","┼","╬","╋","█"],
+        LINES_REVERSED:["█","╋","╬","┼","┃","║","│","═","━","─"," "],
+        LINE_SEMI_CENTRAL_SHADING:[" ","─","━","│","┃","┼","╋","═","║","╬","█"],
+        BINARY:[" ","1","0"],
+        BINARY_REVERSED:["0","1"," "],
+        BINARY_EXPANDED:[" ",".","¹","⁰","1","0"],
+        BINARY_EXPANDED_REVERSED:["0","1","⁰","¹","."," "],
+        DOTS:[" ",".","·","'",":"],
+        SIMPLE:[" ",".",":","-","~","=","Ξ","#"],
+        SYMBOLS:[" ",".","*","+","∞","%","#","&","§","Ξ","@","█"],
+        WAVY_BOXES:[" ",".",":","=","≡","≣","▭","▮","█"],
     }
     static DEFAULT_CHARACTER_SET = ImageToTextConverter.DEFAULT_CHARACTER_SETS.LOW
     static DEFAULT_CVS_SIZE = [...ImageDisplay.RESOLUTIONS.MAX]
     static DEFAULT_MEDIA_SIZE = ["92%", "45%"]
-    static DEFAULT_TEXT_SCALE = [1.92, 1.45]
+    static DEFAULT_TEXT_SCALE = [2, 1.25]
     static DEFAULT_MEDIA_ERROR_CALLBACK = (errorCode, media)=>console.warn("Error while loading media:", ImageDisplay.getErrorFromCode(errorCode), "("+media+")")
     static OUTPUT_FORMATS = {NONE:0, MARKDOWN:1, HTML:2, UNICODE_MONOSPACE:3, NON_BREAKING_SPACES:4}
     static DEFAULT_OUTPUT_FORMAT = ImageToTextConverter.OUTPUT_FORMATS.NONE
@@ -39,7 +55,8 @@ class ImageToTextConverter {
         this._charSet = charSet??ImageToTextConverter.DEFAULT_CHARACTER_SET
         this.#updateCachedRange()
         this._media = null
-        if (sourceMedia) this.loadMedia(sourceMedia)
+        if (typeof sourceMedia=="string" && !sourceMedia.match(/\..{1,4}$/gi)) this.createBigText(sourceMedia)
+        else if (sourceMedia) this.loadMedia(sourceMedia)
     }
 
     /**
@@ -71,8 +88,14 @@ class ImageToTextConverter {
 
     // groups the media pixels according to pxGroupingSize and returns the y and the average value of each
     #mapPixels(pxGroupingSize=this._pxGroupingSize) {
-        let CVS = this._CVS, media = this._media, mediaSize = media.trueSize, width = (mediaSize[0]>>0)>CVS.width?CVS.width:(mediaSize[0]>>0), height = (mediaSize[0]>>0)>CVS.height?CVS.height:(mediaSize[1]>>0), data = CVS.ctx.getImageData(0, 0, width, height).data,
+        let CVS = this._CVS, media = this._media, mediaSize = media.trueSize, width = (mediaSize[0]>>0)>CVS.width?CVS.width:(mediaSize[0]>>0), height = (mediaSize[0]>>0)>CVS.height?CVS.height:(mediaSize[1]>>0), data,
             x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize**2)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, bigPixels = [], minDif = CDEUtils.getAcceptableDiff
+
+        try {data = CVS.ctx.getImageData(0, 0, width, height).data} catch(e) {
+            const src = this._media.source.src
+            console.warn("Media unavailable due to cross-origin, width/height or loading issues."+(src?" \n("+src+")":"")+"\n\n'"+e.message.split(":")[1].trim()+"'")
+            data = []
+        }
 
         for (y=0;y<height;y+=pxGroupingSize) {
             atY = y*pxGroupingSize
@@ -229,6 +252,28 @@ class ImageToTextConverter {
     clear() {
         this._CVS.removeAllObjects()
         this._CVS.clear()
+    }
+
+    /**
+     * Updates the pxGroupingSize and forces a convertion with the new value
+     * @param {Number} pxGroupingSize: The pixel output resolution. Examples, put 1 to get one character per media pixel, or put 5 to get one character per 5x5 pixels of the original media 
+     * @returns The updated pxGroupingSize
+     */
+    updatePxGroupingSize(pxGroupingSize=5) {
+        this._pxGroupingSize = pxGroupingSize
+        this.generate()
+        return this._pxGroupingSize
+    }
+
+    /**
+     * Updates the charSet and forces a convertion with the new value
+     * @param {String[] | String} charSet: The characters used to draw the image going from least visible to most visible. (Leave blank for a random set among default ones)
+     * @returns The updated charSet
+     */
+    updateCharSet(charSet=ImageToTextConverter.DEFAULT_CHARACTER_SETS[CDEUtils.random(0,ImageToTextConverter.DEFAULT_CHARACTER_SETS.length)]) {
+        this.charSet = charSet
+        this.generate()
+        return this.charSet
     }
 
     get CVS() {return this._CVS}
