@@ -79,7 +79,7 @@ writeFileSync(join(destination, "index.js"), `const {ImageToTextConverter} = win
 const converter = new ImageToTextConverter((text)=>{ generatedText.value = text }, null, null, 3)
 
 // Some default text
-converter.createBigText("Img\nTo\nText :D", "32px monospace", [2, 1.25])
+converter.createBigText("Img\\nTo\\nText :D", "32px monospace", [2, 1.25])
 
 // Custom file input
 converter.createHTMLFileInput(mediaInput)

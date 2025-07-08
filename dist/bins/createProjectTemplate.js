@@ -73,7 +73,7 @@ import {ImageDisplay} from "cdejs"
 const converter = new ImageToTextConverter((text)=>{ generatedText.value = text }, null, null, 3)
 
 // Some default text
-converter.createBigText("Img\nTo\nText :D", "32px monospace", [2, 1.25])
+converter.createBigText("Img\\nTo\\nText :D", "32px monospace", [2, 1.25])
 
 // Custom file input
 converter.createHTMLFileInput(mediaInput)
@@ -111,7 +111,7 @@ writeFileSync(join(destination, "package.json"), `{
       "dev": "vite"
     },
     "dependencies": {
-      "imgtotext": "^1.1.0"
+      "imgtotext": "^1.1.1"
     },
     "devDependencies": {
       "vite": "^6.2.2"
