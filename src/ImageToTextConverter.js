@@ -43,16 +43,18 @@ class ImageToTextConverter {
     /**
      * @param {Function} resultCB: A callback called upon a convertion. (text)=>{} 
      * @param {*} sourceMedia: The media to convert
-     * @param {[width, height] | Canvas | HTMLCanvasElement | OffscreenCanvas} maxMediaInputSize: Either a size array or any type of canvas 
+     * @param {Boolean} useColors: Whether to color the generated text or keep it in a uniform color. (Can be VERY performance heavy)
      * @param {Number} pxGroupingSize: The pixel output resolution. Examples, put 1 to get one character per media pixel, or put 5 to get one character per 5x5 pixels of the original media 
      * @param {String[] | String} charSet: The characters used to draw the image going from least visible to most visible.
+     * @param {[width, height] | Canvas | HTMLCanvasElement | OffscreenCanvas} maxMediaInputSize: Either a size array or any type of canvas 
      * @param {Number} maxRefreshRate: The maximal convertions per second 
      */
-    constructor(resultCB, sourceMedia, maxMediaInputSize=ImageToTextConverter.DEFAULT_CVS_SIZE, pxGroupingSize=5, charSet, maxRefreshRate=30) {
+    constructor(resultCB, sourceMedia, pxGroupingSize=5, charSet, useColors=false, maxMediaInputSize=ImageToTextConverter.DEFAULT_CVS_SIZE, maxRefreshRate=30) {
         this._CVS = this.#createCVS(maxMediaInputSize, maxRefreshRate)
         this._resultCB = resultCB
         this._pxGroupingSize = pxGroupingSize||5
         this._charSet = charSet??ImageToTextConverter.DEFAULT_CHARACTER_SET
+        this._useColors = useColors||false
         this.#updateCachedRange()
         this._media = null
         if (typeof sourceMedia=="string" && !sourceMedia.match(/\..{1,4}$/gi)) this.createBigText(sourceMedia)
@@ -88,7 +90,7 @@ class ImageToTextConverter {
 
     // groups the media pixels according to pxGroupingSize and returns the y and the average value of each
     #mapPixels(pxGroupingSize=this._pxGroupingSize) {
-        let CVS = this._CVS, media = this._media, mediaSize = media.trueSize, width = (mediaSize[0]>>0)>CVS.width?CVS.width:(mediaSize[0]>>0), height = (mediaSize[0]>>0)>CVS.height?CVS.height:(mediaSize[1]>>0), data,
+        let CVS = this._CVS, useColors = this._useColors, media = this._media, mediaSize = media.trueSize, width = (mediaSize[0]>>0)>CVS.width?CVS.width:(mediaSize[0]>>0), height = (mediaSize[0]>>0)>CVS.height?CVS.height:(mediaSize[1]>>0), data,
             x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize**2)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, bigPixels = [], minDif = CDEUtils.getAcceptableDiff
 
         try {data = CVS.ctx.getImageData(0, 0, width, height).data} catch(e) {
@@ -108,16 +110,25 @@ class ImageToTextConverter {
                     atI = offsetX+offsetY+i+adjust
 
                     const r = data[atI], g = data[atI+1], b = data[atI+2]
-                    bigPx.push((!data[atI+3] || r==null || g==null || b==null || (i/4)%(pxGroupingSize) >= pxGroupingSize+overflow) ? null : (r+g+b)/3)
+                    bigPx.push((!data[atI+3] || r==null || g==null || b==null || (i/4)%(pxGroupingSize) >= pxGroupingSize+overflow) ? null : useColors?[r,g,b]:(r+g+b/3))
                 }
 
-                let b_ll = bigPx.length, total=0, nullCount=0
+                let b_ll = bigPx.length, total=0, nullCount=0, totalR=0, totalG=0, totalB=0
                 for (let i=0;i<b_ll;i++) {
-                    const pxAvg = bigPx[i]
+                    let pxAvg = bigPx[i]
                     if (pxAvg==null) nullCount++
-                    else total+=pxAvg
+                    else if (useColors) {
+                        const r = pxAvg[0] , g = pxAvg[1], b = pxAvg[2]
+                        pxAvg = (r+g+b)/3
+                        totalR+=r
+                        totalB+=b
+                        totalG+=g
+                    }
+                    total+=pxAvg
                 }
-                bigPixels.push([y, total/(b_ll-nullCount)||0])
+
+                const adjustedCount = (b_ll-nullCount)||0
+                bigPixels.push(useColors ? [y, total/adjustedCount, totalR/adjustedCount, totalG/adjustedCount, totalB/adjustedCount] : [y, total/adjustedCount])
             }
         }
 
@@ -126,7 +137,7 @@ class ImageToTextConverter {
 
     // converts the results of mapPixels() to characters based on the current charSet
     #getText(pixelMappingResults) {
-        let range = this.#cachedRange, chars = this._charSet, c_ll = chars.length, p_ll = pixelMappingResults.length, textResults = "", lastY = 0
+        let range = this.#cachedRange, useColors = this._useColors, chars = this._charSet, c_ll = chars.length, p_ll = pixelMappingResults.length, textResults = "", lastY = 0
 
         for (let i=0;i<p_ll;i++) {
             let bigPx = pixelMappingResults[i], y = bigPx[0], avg = bigPx[1], atValue = -1, charIndex = 0
@@ -138,9 +149,10 @@ class ImageToTextConverter {
                     charIndex = i
                 }
             }
+            const char = chars[charIndex]
 
-            if (y != lastY) textResults+="\n"
-            textResults += chars[charIndex]
+            if (y != lastY) textResults += useColors ? "<br>" : "\n"
+            textResults += useColors ? "<span"+(char.trim().length?" style='color:rgba("+bigPx[2]+", "+bigPx[3]+", "+bigPx[4]+", 1);'":"")+">"+char+"</span>" : char
             lastY = y
         }
         
@@ -276,11 +288,23 @@ class ImageToTextConverter {
         return this.charSet
     }
 
+    /**
+     * Updates whether the generated text uses colors and forces a convertion with the new value
+     * @param {Boolean} useColors: Whether to color the generated text or keep it in a uniform color 
+     * @returns The updated useColors value
+     */
+    updateUseColors(useColors=false) {
+        this._useColors = useColors
+        this.generate()
+        return this._useColors
+    }
+
     get CVS() {return this._CVS}
     get cvs() {return this._CVS.cvs}
     get size() {return this._CVS.size}
     get charSet() {return this._charSet}
     get media() {return this._media}
+    get useColors() {return this._useColors}
     get pxGroupingSize() {return this._pxGroupingSize}
     get resultCB() {return this._resultCB}
     get maxRefreshRate() {return this._CVS.fpsLimit}
@@ -294,6 +318,7 @@ class ImageToTextConverter {
         else this._charSet = charSet
         this.#updateCachedRange()
     }
+    set useColors(useColors) {this._useColors = useColors}
     set pxGroupingSize(pxGroupingSize) {this._pxGroupingSize = pxGroupingSize}
     set maxRefreshRate(maxRefreshRate) {this._CVS.fpsLimit = maxRefreshRate} 
     set resultCB(resultCB) {this._resultCB = resultCB} 

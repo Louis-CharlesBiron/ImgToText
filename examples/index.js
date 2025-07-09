@@ -1,6 +1,6 @@
 //const {ImageToTextConverter} = window.ImgToText, {ImageDisplay} = window.CDE
 
-const converter = new ImageToTextConverter((text)=>showGeneratedText.value=ImageToTextConverter.formatText(text, ImageToTextConverter.OUTPUT_FORMATS.NON_BREAKING_SPACES), "CDEJS", document.getElementById("imgInputDisplay"))
+const converter = new ImageToTextConverter((text)=>showGeneratedText.innerHTML=text, "CDEJS", null, null, null, document.getElementById("imgInputDisplay"))
 
 // FILE INPUT
 converter.createHTMLFileInput(imgInput)
