@@ -37,9 +37,10 @@ class ImageToTextConverter {
     static DEFAULT_MEDIA_ERROR_CALLBACK = (errorCode, media)=>console.warn("Error while loading media:", ImageDisplay.getErrorFromCode(errorCode), "("+media+")")
     static OUTPUT_FORMATS = {NONE:0, MARKDOWN:1, HTML:2, UNICODE_MONOSPACE:3, NON_BREAKING_SPACES:4}
     static DEFAULT_OUTPUT_FORMAT = ImageToTextConverter.OUTPUT_FORMATS.NONE
+    static DEFAULT_COLOR_OPTIMISATION_LEVEL = 12
     static UNICODE_MONOSPACE_CONVERTIONS = {"a":"𝚊","b":"𝚋","c":"𝚌","d":"𝚍","e":"𝚎","f":"𝚏","g":"𝚐","h":"𝚑","i":"𝚒","j":"𝚓","k":"𝚔","l":"𝚕","m":"𝚖","n":"𝚗","o":"𝚘","p":"𝚙","q":"𝚚","r":"𝚛","s":"𝚜","t":"𝚝","u":"𝚞","v":"𝚟","w":"𝚠","x":"𝚡","y":"𝚢","z":"𝚣","A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹","K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃","U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉","0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿",}
 
-    #cachedRange = null
+    #cachedRangeDivision = null
     /**
      * @param {Function} resultCB: A callback called upon a convertion. (text)=>{} 
      * @param {*} sourceMedia: The media to convert
@@ -55,7 +56,8 @@ class ImageToTextConverter {
         this._pxGroupingSize = pxGroupingSize||5
         this._charSet = charSet??ImageToTextConverter.DEFAULT_CHARACTER_SET
         this._useColors = useColors||false
-        this.#updateCachedRange()
+        this._colorOptimizationLevel = ImageToTextConverter.DEFAULT_COLOR_OPTIMISATION_LEVEL
+        this.#updateCachedRangeDivision()
         this._media = null
         if (typeof sourceMedia=="string" && !sourceMedia.match(/\..{1,4}$/gi)) this.createBigText(sourceMedia)
         else if (sourceMedia) this.loadMedia(sourceMedia)
@@ -75,22 +77,20 @@ class ImageToTextConverter {
         else canvas = new OffscreenCanvas(...ImageToTextConverter.DEFAULT_CVS_SIZE)
 
         const CVS = new Canvas(canvas, ()=>{
-            if (this._media?.initialized) this._resultCB(this.#getText(this.#mapPixels(this._pxGroupingSize)))
+            if (this._media?.initialized) this._resultCB(this.#getText(this.#mapPixels()))
         }, maxRefreshRate, null, null, null, true)
 
         return CVS
     }
 
     // updates cached characters set range
-    #updateCachedRange() {
-        let range = [0], c_ll = this._charSet.length, rangeDivision = 255/c_ll
-        for (let i=1;i<c_ll;i++) range[i] = range[i-1]+rangeDivision
-        this.#cachedRange = range
+    #updateCachedRangeDivision() {
+        this.#cachedRangeDivision =  1/(255/this._charSet.length)
     }
 
     // groups the media pixels according to pxGroupingSize and returns the y and the average value of each
     #mapPixels(pxGroupingSize=this._pxGroupingSize) {
-        let CVS = this._CVS, useColors = this._useColors, media = this._media, mediaSize = media.trueSize, width = (mediaSize[0]>>0)>CVS.width?CVS.width:(mediaSize[0]>>0), height = (mediaSize[0]>>0)>CVS.height?CVS.height:(mediaSize[1]>>0), data,
+        let CVS = this._CVS, useColors = this._useColors, media = this._media, mediaSize = media.trueSize, width = mediaSize[0]>CVS.width?CVS.width:(mediaSize[0]>>0), height = mediaSize[0]>CVS.height?CVS.height:(mediaSize[1]>>0), data,
             x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize**2)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, bigPixels = [], minDif = CDEUtils.getAcceptableDiff
 
         try {data = CVS.ctx.getImageData(0, 0, width, height).data} catch(e) {
@@ -110,7 +110,7 @@ class ImageToTextConverter {
                     atI = offsetX+offsetY+i+adjust
 
                     const r = data[atI], g = data[atI+1], b = data[atI+2]
-                    bigPx.push((!data[atI+3] || r==null || g==null || b==null || (i/4)%(pxGroupingSize) >= pxGroupingSize+overflow) ? null : useColors?[r,g,b]:(r+g+b/3))
+                    bigPx.push((!data[atI+3] || r==null || g==null || b==null || (i/4)%(pxGroupingSize) >= pxGroupingSize+overflow) ? null : useColors?[r,g,b]:(r+g+b)/3)
                 }
 
                 let b_ll = bigPx.length, total=0, nullCount=0, totalR=0, totalG=0, totalB=0
@@ -128,7 +128,7 @@ class ImageToTextConverter {
                 }
 
                 const adjustedCount = (b_ll-nullCount)||0
-                bigPixels.push(useColors ? [y, total/adjustedCount, totalR/adjustedCount, totalG/adjustedCount, totalB/adjustedCount] : [y, total/adjustedCount])
+                bigPixels.push(useColors ? [y, total/adjustedCount, (totalR/adjustedCount)>>0, (totalG/adjustedCount)>>0, (totalB/adjustedCount)>>0] : [y, total/adjustedCount])
             }
         }
 
@@ -137,23 +137,34 @@ class ImageToTextConverter {
 
     // converts the results of mapPixels() to characters based on the current charSet
     #getText(pixelMappingResults) {
-        let range = this.#cachedRange, useColors = this._useColors, chars = this._charSet, c_ll = chars.length, p_ll = pixelMappingResults.length, textResults = "", lastY = 0
+        let rangeDivision = this.#cachedRangeDivision, useColors = this._useColors, tolerance = this._colorOptimizationLevel, isColorOptimized = useColors&&tolerance, chars = this._charSet, p_ll = pixelMappingResults.length, textResults = "", lastY = 0, streaks, s_ll = 0
 
         for (let i=0;i<p_ll;i++) {
-            let bigPx = pixelMappingResults[i], y = bigPx[0], avg = bigPx[1], atValue = -1, charIndex = 0
+            const bigPx = pixelMappingResults[i], y = bigPx[0], char = chars[Math.min(((bigPx[1]||0)*rangeDivision)|0, chars.length-1)], r = bigPx[2], g = bigPx[3], b = bigPx[4]
 
-            for (let i=0;i<c_ll;i++) {
-                const newValue = range[i]
-                if (newValue<=avg && newValue>atValue) {
-                    atValue = newValue
-                    charIndex = i
+            if (isColorOptimized) {
+                if (!i) streaks = [[char, r, g, b]]
+                else {
+                    const streak = streaks[s_ll], sr = streak[1], sg = streak[2], sb = streak[3]
+                
+                    if (y != lastY) streak[0] += "<br>"
+    
+                    if (r<=(sr+tolerance) && r>=(sr-tolerance) && g<=(sg+tolerance) && g>=(sg-tolerance) && b<=(sb+tolerance) && b>=(sb-tolerance)) streak[0] += char
+                    else s_ll = streaks.push([char, r, g, b])-1
                 }
+            } else {
+                if (y != lastY) textResults += useColors ? "<br>" : "\n"
+                textResults += useColors ? ((r+g+b) ? `<c style="color:rgb(${r},${g},${b});">${char}</c>` : `<c>${char}</c>`) : char
             }
-            const char = chars[charIndex]
-
-            if (y != lastY) textResults += useColors ? "<br>" : "\n"
-            textResults += useColors ? "<span"+(char.trim().length?" style='color:rgba("+bigPx[2]+", "+bigPx[3]+", "+bigPx[4]+", 1);'":"")+">"+char+"</span>" : char
             lastY = y
+        }
+
+        if (isColorOptimized) {
+            s_ll++
+            for (let i=0;i<s_ll;i++) {
+                const streak = streaks[i], sr = streak[1], sg = streak[2], sb = streak[3]
+                textResults += (sr+sg+sb) ? `<c style="color:rgb(${sr},${sg},${sb});">${streak[0]}</c>` : `<c>${streak[0]}</c>`
+            }
         }
         
         return textResults
@@ -299,12 +310,24 @@ class ImageToTextConverter {
         return this._useColors
     }
 
+    /**
+     * Updates the colorOptimizationLevel and forces a convertion with the new value
+     * @param {Number? | null} colorOptimizationLevel: Defines the color tolerance for character grouping optimizations. If false or null, disables the character grouping optimizations.
+     * @returns The updated useColors value
+     */
+    updateColorOptimizationLevel(colorOptimizationLevel=ImageToTextConverter.DEFAULT_COLOR_OPTIMISATION_LEVEL) {
+        this._colorOptimizationLevel = colorOptimizationLevel
+        this.generate()
+        return this._colorOptimizationLevel
+    }
+
     get CVS() {return this._CVS}
     get cvs() {return this._CVS.cvs}
     get size() {return this._CVS.size}
     get charSet() {return this._charSet}
     get media() {return this._media}
     get useColors() {return this._useColors}
+    get colorOptimizationLevel() {return this._colorOptimizationLevel}
     get pxGroupingSize() {return this._pxGroupingSize}
     get resultCB() {return this._resultCB}
     get maxRefreshRate() {return this._CVS.fpsLimit}
@@ -316,8 +339,9 @@ class ImageToTextConverter {
     set charSet(charSet) {
         if (typeof charSet=="string") this._charSet = [...charSet]
         else this._charSet = charSet
-        this.#updateCachedRange()
+        this.#updateCachedRangeDivision()
     }
+    set colorOptimizationLevel(level) {this._colorOptimizationLevel = level}
     set useColors(useColors) {this._useColors = useColors}
     set pxGroupingSize(pxGroupingSize) {this._pxGroupingSize = pxGroupingSize}
     set maxRefreshRate(maxRefreshRate) {this._CVS.fpsLimit = maxRefreshRate} 

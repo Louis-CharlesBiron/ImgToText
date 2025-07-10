@@ -41,6 +41,12 @@ const settingsBlocks = [
             converter.generate()
         }
         return value+"%"
+    }],
+    [coSlider, manualCO, coValue, (value)=>{
+        if (converter.useColors && converter.media) {
+            converter.updateColorOptimizationLevel(value)
+        }
+        return "±"+value
     }]
 ]
 
@@ -56,6 +62,9 @@ settingsBlocks.forEach((els)=>{
         els[1].value = v
     }
 })
+
+// USE COLORS INPUT
+useColorsInput.oninput=(e)=>converter.updateUseColors(e.target.checked)
 
 
 
@@ -80,7 +89,7 @@ defaultChars.oninput=e=>{
 }
 
 copyBtn.onclick=()=>{
-        if (navigator.clipboard) navigator.clipboard.writeText(showGeneratedText.value.trimEnd())
+        if (navigator.clipboard) navigator.clipboard.writeText(showGeneratedText.innerHTML.trimEnd())
         showGeneratedText.select()
         showGeneratedText.setSelectionRange(0, 99999)
 }
