@@ -35,7 +35,7 @@ class ImageToTextConverter {
     static DEFAULT_MEDIA_SIZE = ["92%", "45%"]
     static DEFAULT_TEXT_SCALE = [2, 1.25]
     static DEFAULT_MEDIA_ERROR_CALLBACK = (errorCode, media)=>console.warn("Error while loading media:", ImageDisplay.getErrorFromCode(errorCode), "("+media+")")
-    static OUTPUT_FORMATS = {NONE:0, MARKDOWN:1, HTML:2, UNICODE_MONOSPACE:3, NON_BREAKING_SPACES:4}
+    static OUTPUT_FORMATS = {NONE:0, MARKDOWN_COLORLESS:1, HTML:2, UNICODE_MONOSPACE:3, NON_BREAKING_SPACES:4}
     static DEFAULT_OUTPUT_FORMAT = ImageToTextConverter.OUTPUT_FORMATS.NONE
     static DEFAULT_COLOR_OPTIMISATION_LEVEL = 12
     static UNICODE_MONOSPACE_CONVERTIONS = {"a":"𝚊","b":"𝚋","c":"𝚌","d":"𝚍","e":"𝚎","f":"𝚏","g":"𝚐","h":"𝚑","i":"𝚒","j":"𝚓","k":"𝚔","l":"𝚕","m":"𝚖","n":"𝚗","o":"𝚘","p":"𝚙","q":"𝚚","r":"𝚛","s":"𝚜","t":"𝚝","u":"𝚞","v":"𝚟","w":"𝚠","x":"𝚡","y":"𝚢","z":"𝚣","A":"𝙰","B":"𝙱","C":"𝙲","D":"𝙳","E":"𝙴","F":"𝙵","G":"𝙶","H":"𝙷","I":"𝙸","J":"𝙹","K":"𝙺","L":"𝙻","M":"𝙼","N":"𝙽","O":"𝙾","P":"𝙿","Q":"𝚀","R":"𝚁","S":"𝚂","T":"𝚃","U":"𝚄","V":"𝚅","W":"𝚆","X":"𝚇","Y":"𝚈","Z":"𝚉","0":"𝟶","1":"𝟷","2":"𝟸","3":"𝟹","4":"𝟺","5":"𝟻","6":"𝟼","7":"𝟽","8":"𝟾","9":"𝟿",}
@@ -146,9 +146,7 @@ class ImageToTextConverter {
                 if (!i) streaks = [[char, r, g, b]]
                 else {
                     const streak = streaks[s_ll], sr = streak[1], sg = streak[2], sb = streak[3]
-                
                     if (y != lastY) streak[0] += "<br>"
-    
                     if (r<=(sr+tolerance) && r>=(sr-tolerance) && g<=(sg+tolerance) && g>=(sg-tolerance) && b<=(sb+tolerance) && b>=(sb-tolerance)) streak[0] += char
                     else s_ll = streaks.push([char, r, g, b])-1
                 }
@@ -163,7 +161,7 @@ class ImageToTextConverter {
             s_ll++
             for (let i=0;i<s_ll;i++) {
                 const streak = streaks[i], sr = streak[1], sg = streak[2], sb = streak[3]
-                textResults += (sr+sg+sb) ? `<c style="color:rgb(${sr},${sg},${sb});">${streak[0]}</c>` : `<c>${streak[0]}</c>`
+                textResults += (sr+sg+sb) ? `<c style="color:rgb(${sr},${sg},${sb})">${streak[0]}</c>` : `<c>${streak[0]}</c>`
             }
         }
         
@@ -255,7 +253,7 @@ class ImageToTextConverter {
      */
     static formatText(text, outputFormatingMethod=ImageToTextConverter.DEFAULT_OUTPUT_FORMAT) {
         const outputFormats = ImageToTextConverter.OUTPUT_FORMATS
-        if (outputFormatingMethod==outputFormats.MARKDOWN) return "```\n"+text+"\n```"
+        if (outputFormatingMethod==outputFormats.MARKDOWN_COLORLESS) return "```\n"+text+"\n```"
         else if (outputFormatingMethod==outputFormats.HTML) return `<div style="white-space: pre !important;font-family: monospace !important;font-size: 16px;letter-spacing: 0px;line-height: 18px;">${text}</div>`
         else if (outputFormatingMethod==outputFormats.NON_BREAKING_SPACES) return text.replaceAll(" ", "\u00A0")
         else if (outputFormatingMethod==outputFormats.UNICODE_MONOSPACE) {

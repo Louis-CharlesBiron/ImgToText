@@ -1,6 +1,9 @@
 //const {ImageToTextConverter} = window.ImgToText, {ImageDisplay} = window.CDE
 
-const converter = new ImageToTextConverter((text)=>showGeneratedText.innerHTML=text, "CDEJS", null, null, null, document.getElementById("imgInputDisplay"))
+const fpsCounter = new FPSCounter(), titleEl = document.querySelector("title"), converter = new ImageToTextConverter((text)=>{
+    showGeneratedText.innerHTML=text
+    titleEl.textContent = fpsCounter.getFps()
+}, "CDEJS", null, null, null, document.getElementById("imgInputDisplay"))
 
 // FILE INPUT
 converter.createHTMLFileInput(imgInput)
@@ -90,6 +93,6 @@ defaultChars.oninput=e=>{
 
 copyBtn.onclick=()=>{
         if (navigator.clipboard) navigator.clipboard.writeText(showGeneratedText.innerHTML.trimEnd())
-        showGeneratedText.select()
-        showGeneratedText.setSelectionRange(0, 99999)
+        //showGeneratedText.select()
+        //showGeneratedText.setSelectionRange(0, 99999)
 }
