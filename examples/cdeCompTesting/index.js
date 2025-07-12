@@ -1,9 +1,38 @@
 //const {ImageToTextConverter} = window.ImgToText, {ImageDisplay} = window.CDE
 
-const fpsCounter = new FPSCounter(), titleEl = document.querySelector("title"), converter = new ImageToTextConverter((text)=>{
+const _ = null, fpsCounter = new FPSCounter(), titleEl = document.querySelector("title"), converter = new ImageToTextConverter((text)=>{
     showGeneratedText.innerHTML=text
     titleEl.textContent = fpsCounter.getFps()
-}, "CDEJS", null, null, null, document.getElementById("imgInputDisplay"))
+}, "CDEJS", _, _, _, document.getElementById("imgInputDisplay")), CVS = converter.CVS
+
+
+
+
+
+
+
+let glitchColor =  [0,255,0,1]
+
+CanvasUtils.createEmptyObj(CVS, _, ()=>{
+    CVS.render.transformArea(Render.COLOR_TRANSFORMS.GRAYSCALE, _, [[0,0],[CVS.width, CVS.height]])
+    CVS.render.replaceColor([200,200,200,1], glitchColor, 90, [[0, 0], [CVS.width, CVS.height]], CDEUtils.random(1, 10))
+
+    //CVS.render.transformArea(Render.COLOR_TRANSFORMS.TINT, [33, 255, 100, 0.25], [[350, 100], [530, 540]])
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // FILE INPUT
 converter.createHTMLFileInput(imgInput)
@@ -68,6 +97,7 @@ settingsBlocks.forEach((els)=>{
 
 // USE COLORS INPUT
 useColorsInput.oninput=(e)=>converter.updateUseColors(e.target.checked)
+
 
 
 Object.entries(ImageToTextConverter.DEFAULT_CHARACTER_SETS).forEach(([name, chars])=>{

@@ -271,7 +271,7 @@ class ImageToTextConverter {
 
     // Clears anything drawn on the converter's canvas
     clear() {
-        this._CVS.removeAllObjects()
+        if (this._media) this._media.remove()
         this._CVS.clear()
     }
 
