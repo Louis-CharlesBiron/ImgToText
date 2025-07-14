@@ -29,7 +29,7 @@ writeFileSync(join(destination, "index.html"), `<!DOCTYPE html>
 </head>
 <body>
 
-    <textarea id="generatedText" autocomplete="off" spellcheck="false"></textarea>
+    <div id="generatedText" autocomplete="off" spellcheck="false"></div>
 
     <div class="settings">
         <button id="copyResult">Copy Text Result</button>
@@ -90,17 +90,9 @@ inputCamera.onclick=()=>{
     mediaInput.value = ""
 }
 
-// Sreen capture input
-inputScreen.onclick=()=>{
-    converter.loadMedia(ImageDisplay.loadCapture())
-    mediaInput.value = ""
-}
-
 // Copy text result
 copyResult.onclick=()=>{
-    if (navigator.clipboard) navigator.clipboard.writeText(generatedText.value.trimEnd())
-    generatedText.select()
-    generatedText.setSelectionRange(0, 999999)
+    if (navigator.clipboard) navigator.clipboard.writeText(generatedText.innerHTML.trimEnd())
 }`)
 
 
