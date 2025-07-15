@@ -76,7 +76,7 @@ The ImageToTextConverter class allows the full conversion and customization of i
 - **pxGroupingSize**? -> The pixel output resolution. E.g.: `1` converts pixels to characters at a 1:1 ratio (one character per media pixel), and `5` converts pixels to characters at a 25:1 ratio (one character per 5x5 pixels of the original media). Defaults to `5`.
 - **charSet**? -> The characters used to draw the image using text, going from least visible to most visible. Either a `String` or an `Array`. Defaults to `[" ", ".", ":", "-", "~", "=", "+", "o" , "O" , "X", "H", "M"]`.
 - **useColors**? -> Whether to color the generated text or keep it the default environment color (This uses HTML to render colors and thus can be VERY performance heavy).
-- ***colorOptimizationLevel*** -> Defines the color tolerance (0..255) for character grouping optimizations when using colors. If `false` or `null`, disables the character grouping optimizations.
+- *colorOptimizationLevel* -> Defines the color tolerance (0..255) for character grouping optimizations when using colors. If `false` or `null`, disables the character grouping optimizations.
 - **maxMediaInputSize**? -> The canvas or canvas size on which media will be drawn. Either a size array *`[width, height]`*, a *`HTMLCanvasElement`* (to see medias before conversion), a *`OffscreenCanvas`*, or a [*CDEJS `Canvas`*](https://github.com/Louis-CharlesBiron/canvasDotEffect?tab=readme-ov-file#canvas). Defaults to about `[3840, 2160]`.
 
 - **maxRefreshRate**? -> The aimed conversions per second (mostly for videos). Defaults to `30`fps.
@@ -91,10 +91,10 @@ The ImageToTextConverter class allows the full conversion and customization of i
     // Loading and converting a new image
     converter.loadMedia(
         "someImg.png",    // The media path
- [100, 100],       // The rendered size of the media
- [[0,0], ["50%", "100%"]]     // Cropping to only use the left half of the media 
- ()=>console.log("Image loaded!"),       // Callback called upon media load
- ()=>console.warn("Error loading image!")// Callback called upon error loading media
+        [100, 100],       // The rendered size of the media
+        [[0,0], ["50%", "100%"]]     // Cropping to only use the left half of the media 
+        ()=>console.log("Image loaded!"),       // Callback called upon media load
+        ()=>console.warn("Error loading image!")// Callback called upon error loading media
  )
 ```
 ```js
@@ -201,27 +201,27 @@ ooo=----------.  ~oooooooooo+: ~oOOOOoo~ :oooooo+: -+ooooooo~..~oooooooooooooo=
 
 ### JS code:
 ```js
-        // Creating a default ImageToTextConverter
-        new ImageToTextConverter(
- (text)=>{console.log(text)}, // resultCB: function called upon a conversion, here simply logging to the console
-            "https://static.wikia.nocookie.net/logopedia/images/4/41/Geometry_Dash_Icon.svg", // sourceMedia: the source of the image to convert
-            3 // pxGroupingGroup: grouping pixels 3x3 
- )
+// Creating a default ImageToTextConverter
+new ImageToTextConverter(
+    (text)=>{console.log(text)}, // resultCB: function called upon a conversion, here simply logging to the console
+    "https://static.wikia.nocookie.net/logopedia/images/4/41/Geometry_Dash_Icon.svg", // sourceMedia: the source of the image to convert
+    3 // pxGroupingGroup: grouping pixels 3x3 
+)
 ``` 
 
 # Converting some text
 "cdejs"
 ```
- MMMMMMMM     MMMMMMMM        MMMMMMMMM      MMMMMMMM       MMMMMMMM      
- MMMMMMMMMM     MMMMMMMMMM      MMMMMMMMM      MMMMMMMM      MMMMMMMMM      
- MMMM           MMM   MMMM      MMM                 MMM      MMM            
-MMMM            MMM    MMMM     MMM                 MMM      MMMMMM         
-MMMM            MMM     MMM     MMMMMMMM            MMM       MMMMMMMM      
-MMMM            MMM    MMMM     MMM                 MMM          MMMMMM     
- MMM            MMM    MMMM     MMM                 MMM             MMM     
- MMMMM   MM     MMM MMMMMM      MMM            MM  MMMM      MM    MMMM     
- MMMMMMMMM     MMMMMMMMM       MMMMMMMMM      MMMMMMM       MMMMMMMMMM     
- MMMMMM                                      MMMM          MMMMMM
+   MMMMMMMM     MMMMMMMM        MMMMMMMMM      MMMMMMMM       MMMMMMMM      
+ MMMMMMMMMM     MMMMMMMMMM      MMMMMMMMM      MMMMMMMM      MMMMMMMMM      
+ MMMM           MMM   MMMM      MMM                 MMM      MMM            
+MMMM            MMM    MMMM     MMM                 MMM      MMMMMM         
+MMMM            MMM     MMM     MMMMMMMM            MMM       MMMMMMMM      
+MMMM            MMM    MMMM     MMM                 MMM          MMMMMM     
+ MMM            MMM    MMMM     MMM                 MMM             MMM     
+ MMMMM   MM     MMM MMMMMM      MMM            MM  MMMM      MM    MMMM     
+  MMMMMMMMM     MMMMMMMMM       MMMMMMMMM      MMMMMMM       MMMMMMMMMM     
+    MMMMMM                                      MMMM          MMMMMM
 ```
 
 ### Settings used (All defaults):
@@ -235,8 +235,8 @@ MMMM            MMM    MMMM     MMM            
 
 ### JS code:
 ```js
-    // Creating a default ImageToTextConverter and loading the text "CDEJS" to be converted
-    new ImageToTextConverter((text)=>{console.log(text)}, "CDEJS")
+// Creating a default ImageToTextConverter and loading the text "CDEJS" to be converted
+new ImageToTextConverter((text)=>{console.log(text)}, "CDEJS")
 ``` 
 
 # Converting a video:
@@ -258,7 +258,7 @@ MMMM            MMM    MMMM     MMM            
 ### JS code:
 ```js
     // Creating an ImageToTextConverter with a pixel grouping size of 3
-    const converter = new ImageToTextConverter((text)=>{console.log(text)}, null, 3)
+    const converter = new ImageToTextConverter((text)=>console.log(text), null, 3)
     
     // Loading the video to be converted with a specific size
     converter.loadMedia("./img/exampleRaw.mp4", ["100%", "45%"])

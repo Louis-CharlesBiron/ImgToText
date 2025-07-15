@@ -260,7 +260,6 @@ class ImageToTextConverter {
             const unicodeMonospaceConversions = ImageToTextConverter.UNICODE_MONOSPACE_CONVERTIONS
             return text.replaceAll(/./g, (char)=>unicodeMonospaceConversions[char]||char)
         }
-        
         return text
     }
 

@@ -260,7 +260,6 @@ class ImageToTextConverter {
             const unicodeMonospaceConversions = ImageToTextConverter.UNICODE_MONOSPACE_CONVERTIONS
             return text.replaceAll(/./g, (char)=>unicodeMonospaceConversions[char]||char)
         }
-        
         return text
     }
 
@@ -271,7 +270,7 @@ class ImageToTextConverter {
 
     // Clears anything drawn on the converter's canvas
     clear() {
-        this._CVS.removeAllObjects()
+        if (this._media) this._media.remove()
         this._CVS.clear()
     }
 

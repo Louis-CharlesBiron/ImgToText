@@ -103,7 +103,7 @@ writeFileSync(join(destination, "package.json"), `{
       "dev": "vite"
     },
     "dependencies": {
-      "imgtotext": "^1.1.1"
+      "imgtotext": "^1.2.0"
     },
     "devDependencies": {
       "vite": "^6.2.2"

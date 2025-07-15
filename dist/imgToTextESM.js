@@ -259,7 +259,6 @@ import{CDEUtils,FPSCounter,CanvasUtils,Color,_HasColor,GridAssets,TypingDevice,M
             const unicodeMonospaceConversions = ImageToTextConverter.UNICODE_MONOSPACE_CONVERTIONS
             return text.replaceAll(/./g, (char)=>unicodeMonospaceConversions[char]||char)
         }
-        
         return text
     }
 
@@ -270,7 +269,7 @@ import{CDEUtils,FPSCounter,CanvasUtils,Color,_HasColor,GridAssets,TypingDevice,M
 
     // Clears anything drawn on the converter's canvas
     clear() {
-        this._CVS.removeAllObjects()
+        if (this._media) this._media.remove()
         this._CVS.clear()
     }
 
