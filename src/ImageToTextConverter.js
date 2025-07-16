@@ -90,7 +90,7 @@ class ImageToTextConverter {
 
     // groups the media pixels according to pxGroupingSize and returns the y and the average value of each
     #mapPixels(pxGroupingSize=this._pxGroupingSize) {
-        let CVS = this._CVS, useColors = this._useColors, media = this._media, mediaSize = media.trueSize, width = mediaSize[0]>CVS.width?CVS.width:(mediaSize[0]>>0), height = mediaSize[0]>CVS.height?CVS.height:(mediaSize[1]>>0), data,
+        let CVS = this._CVS, useColors = this._useColors, media = this._media, mediaSize = media.trueSize, width = mediaSize[0]>CVS.width?CVS.width:(mediaSize[0]>>0), height = mediaSize[1]>CVS.height?CVS.height:(mediaSize[1]>>0), data,
             x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize**2)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, bigPixels = [], minDif = CDEUtils.getAcceptableDiff
 
         try {data = CVS.ctx.getImageData(0, 0, width, height).data} catch(e) {
@@ -98,6 +98,7 @@ class ImageToTextConverter {
             console.warn("Media unavailable due to cross-origin, width/height or loading issues."+(src?" \n("+src+")":"")+"\n\n'"+e.message.split(":")[1].trim()+"'")
             data = []
         }
+
 
         for (y=0;y<height;y+=pxGroupingSize) {
             atY = y*pxGroupingSize
@@ -109,8 +110,9 @@ class ImageToTextConverter {
                     if (!((i/4)%pxGroupingSize)&&i) adjust = (width*4)*((i/pxGroupingCount)*pxGroupingSize)-i
                     atI = offsetX+offsetY+i+adjust
 
+                    if (!data[atI+3]) continue;
                     const r = data[atI], g = data[atI+1], b = data[atI+2]
-                    bigPx.push((!data[atI+3] || r==null || g==null || b==null || (i/4)%(pxGroupingSize) >= pxGroupingSize+overflow) ? null : useColors?[r,g,b]:(r+g+b)/3)
+                    bigPx.push((r==null || g==null || b==null || (i/4)%(pxGroupingSize) >= pxGroupingSize+overflow) ? null : useColors?[r,g,b]:(r+g+b)/3)
                 }
 
                 let b_ll = bigPx.length, total=0, nullCount=0, totalR=0, totalG=0, totalB=0

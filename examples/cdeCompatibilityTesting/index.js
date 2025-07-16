@@ -17,7 +17,7 @@ CanvasUtils.createEmptyObj(CVS, _, ()=>{
     CVS.render.transformArea(Render.COLOR_TRANSFORMS.GRAYSCALE, _, [[0,0],[CVS.width, CVS.height]])
     CVS.render.replaceColor([200,200,200,1], glitchColor, 90, [[0, 0], [CVS.width, CVS.height]], CDEUtils.random(1, 10))
 
-    //CVS.render.transformArea(Render.COLOR_TRANSFORMS.TINT, [33, 255, 100, 0.25], [[350, 100], [530, 540]])
+    CVS.render.transformArea(Render.COLOR_TRANSFORMS.FORCE_TINT, [33, 255, 100, 0.25], [[350, 100], [530, 540]])
 })
 
 
@@ -39,13 +39,13 @@ converter.createHTMLFileInput(imgInput)
 
 // CAMERA CAPTURE INPUT
 camBtn.onclick=()=>{
-    converter.loadMedia(ImageDisplay.loadCamera())
+    converter.loadMedia(ImageDisplay.loadCamera(), [widthValue.textContent, heightValue.textContent])
     imgInput.value = ""
 }
 
 // SCREEN CAPTURE INPUT
 screenBtn.onclick=()=>{
-    converter.loadMedia(ImageDisplay.loadCapture())
+    converter.loadMedia(ImageDisplay.loadCapture(), [widthValue.textContent, heightValue.textContent])
     imgInput.value = ""
 }
 
@@ -54,7 +54,7 @@ screenBtn.onclick=()=>{
 const settingsBlocks = [
     [pxGroupingSlider, manualPxGrouping, pxGroupingValue, (value)=>{
         converter.pxGroupingSize = value
-        converter.generate()
+        if (value > 0) converter.generate()
         return "x"+value
     }],
     [letterSpacingSlider, manualLetterSpacing, letterSpacingValue, (value)=>{showGeneratedText.style.letterSpacing = value+"px"}],
