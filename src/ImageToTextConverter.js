@@ -91,7 +91,7 @@ class ImageToTextConverter {
     // groups the media pixels according to pxGroupingSize and returns the y and the average value of each
     #mapPixels(pxGroupingSize=this._pxGroupingSize) {
         let CVS = this._CVS, useColors = this._useColors, media = this._media, mediaSize = media.trueSize, width = mediaSize[0]>CVS.width?CVS.width:(mediaSize[0]>>0), height = mediaSize[1]>CVS.height?CVS.height:(mediaSize[1]>>0), data,
-            x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize**2)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, bigPixels = [], minDif = CDEUtils.getAcceptableDiff
+            x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize*pxGroupingSize)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, bigPixels = [], round = Math.round, pxGS4 = pxGroupingSize*4, GCCX = pxGroupingCount*bigPxCountX, pxLength = (width*4)*pxGroupingSize
 
         try {data = CVS.ctx.getImageData(0, 0, width, height).data} catch(e) {
             const src = this._media.source.src
@@ -99,15 +99,16 @@ class ImageToTextConverter {
             data = []
         }
 
-
         for (y=0;y<height;y+=pxGroupingSize) {
             atY = y*pxGroupingSize
             for (x=0;x<width;x+=pxGroupingSize) {
                 atX = x*pxGroupingSize
-                const overflow = width-(x+pxGroupingSize), bigPx = [], offsetX = minDif((((atX/pxGroupingSize)/width)*bigPxCountX)*pxGroupingSize*4, 0.000001), offsetY = minDif((((atY/pxGroupingSize)/height)*bigPxCountY)*pxGroupingCount*bigPxCountX, 0.000001)
+                const overflow = width-(x+pxGroupingSize), bigPx = [], 
+                      rawOffsetX = (((atX/pxGroupingSize)/width)*bigPxCountX)*pxGS4, roundedOX = round(rawOffsetX), offsetX = roundedOX-rawOffsetX <= 1e-6 ? roundedOX : rawOffsetX,
+                      rawOffsetY = (((atY/pxGroupingSize)/height)*bigPxCountY)*GCCX, roundedOY = round(rawOffsetY), offsetY = roundedOY-rawOffsetY <= 1e-6 ? roundedOY : rawOffsetY
                 
                 for (let i=0,adjust=0;i<pxGroupingCount;i+=4) {
-                    if (!((i/4)%pxGroupingSize)&&i) adjust = (width*4)*((i/pxGroupingCount)*pxGroupingSize)-i
+                    if (i&&!((i/4)%pxGroupingSize)) adjust = pxLength*((i/pxGroupingCount))-i
                     atI = offsetX+offsetY+i+adjust
 
                     if (!data[atI+3]) continue;
