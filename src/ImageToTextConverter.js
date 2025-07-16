@@ -91,7 +91,7 @@ class ImageToTextConverter {
     // groups the media pixels according to pxGroupingSize and returns the y and the average value of each
     #mapPixels(pxGroupingSize=this._pxGroupingSize) {
         let CVS = this._CVS, useColors = this._useColors, media = this._media, mediaSize = media.trueSize, width = mediaSize[0]>CVS.width?CVS.width:(mediaSize[0]>>0), height = mediaSize[1]>CVS.height?CVS.height:(mediaSize[1]>>0), data,
-            x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize*pxGroupingSize)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, bigPixels = [], round = Math.round, pxGS4 = pxGroupingSize*4, GCCX = pxGroupingCount*bigPxCountX, pxLength = (width*4)*pxGroupingSize
+            x, y, atI, pxGroupingCount = (pxGroupingSize*pxGroupingSize)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, bigPixels = [], round = Math.round, pxGS4 = bigPxCountX*pxGroupingSize*4, GCCX = bigPxCountY*pxGroupingCount*bigPxCountX, pxLength = width*4*pxGroupingSize
 
         try {data = CVS.ctx.getImageData(0, 0, width, height).data} catch(e) {
             const src = this._media.source.src
@@ -100,37 +100,28 @@ class ImageToTextConverter {
         }
 
         for (y=0;y<height;y+=pxGroupingSize) {
-            atY = y*pxGroupingSize
+            const offsetY = round((((y*pxGroupingSize)/pxGroupingSize)/height)*GCCX)
             for (x=0;x<width;x+=pxGroupingSize) {
-                atX = x*pxGroupingSize
-                const overflow = width-(x+pxGroupingSize), bigPx = [], 
-                      rawOffsetX = (((atX/pxGroupingSize)/width)*bigPxCountX)*pxGS4, roundedOX = round(rawOffsetX), offsetX = roundedOX-rawOffsetX <= 1e-6 ? roundedOX : rawOffsetX,
-                      rawOffsetY = (((atY/pxGroupingSize)/height)*bigPxCountY)*GCCX, roundedOY = round(rawOffsetY), offsetY = roundedOY-rawOffsetY <= 1e-6 ? roundedOY : rawOffsetY
+                let offsetX = round((((x*pxGroupingSize)/pxGroupingSize)/width)*pxGS4), pxTotal = 0, total=0, nullCount=0, totalR=0, totalG=0, totalB=0
                 
                 for (let i=0,adjust=0;i<pxGroupingCount;i+=4) {
-                    if (i&&!((i/4)%pxGroupingSize)) adjust = pxLength*((i/pxGroupingCount))-i
+                    const i2 = (i>>2)%pxGroupingSize
+                    if (i&&!i2) adjust = pxLength*(i/pxGroupingCount)-i
                     atI = offsetX+offsetY+i+adjust
 
                     if (!data[atI+3]) continue;
-                    const r = data[atI], g = data[atI+1], b = data[atI+2]
-                    bigPx.push((r==null || g==null || b==null || (i/4)%(pxGroupingSize) >= pxGroupingSize+overflow) ? null : useColors?[r,g,b]:(r+g+b)/3)
-                }
-
-                let b_ll = bigPx.length, total=0, nullCount=0, totalR=0, totalG=0, totalB=0
-                for (let i=0;i<b_ll;i++) {
-                    let pxAvg = bigPx[i]
+                    const r = data[atI], g = data[atI+1], b = data[atI+2], pxAvg = (r==null || x+i2 >= width) ? null : (r+g+b)/3
                     if (pxAvg==null) nullCount++
                     else if (useColors) {
-                        const r = pxAvg[0] , g = pxAvg[1], b = pxAvg[2]
-                        pxAvg = (r+g+b)/3
                         totalR+=r
                         totalB+=b
                         totalG+=g
                     }
                     total+=pxAvg
+                    pxTotal++
                 }
 
-                const adjustedCount = (b_ll-nullCount)||0
+                const adjustedCount = (pxTotal-nullCount)||0
                 bigPixels.push(useColors ? [y, total/adjustedCount, (totalR/adjustedCount)>>0, (totalG/adjustedCount)>>0, (totalB/adjustedCount)>>0] : [y, total/adjustedCount])
             }
         }
