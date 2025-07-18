@@ -9,11 +9,11 @@
 
 # ImgToText
 
-## **ImgToText is a concise library that converts any image/video into custom text, usable in any website**
+## **ImgToText is a concise library that converts any image/video into custom text**
 
-**The library makes your website able to generate live conversions of pretty much any given media, and thus can be used to create some pretty interesting effects.**
+**This library makes your website able to generate live text conversions of pretty much any given media, and thus can be used to create some pretty interesting effects!**
 
-**And if you don't know much about code and only want to use the converted text, you can check out this [simple web interface](https://embelliron.com/lcb_tests/imgToText/)!**
+And if you don't know much about code and only want to use the converted text, you can check out this [simple web interface](https://embelliron.com/lcb_tests/imgToText/)!
 
 <span style="font-size:10px;font-family:monospace;">
                                                                      
@@ -303,11 +303,11 @@ To keep the best performance on your website/app, you may want to use some optim
 
 - Lower the media size. The media size is the most impactful on performance, so make sure the converted media is not unnecessarily big.
 
-- Try to avoid using colors (especially with high frequency conversions, ex: videos)
+- Try to avoid using colors (especially with high frequency conversions, such as videos)
 
-- When using colors, try to make the color optimization level higher. This will try to group characters by color with the defined level of tolerance. This greatly helps to reduce the amount of HTML elements required to render the text, which in turn helps to improve performances.
+- When using colors, try to make the color optimization level higher. This will try to group characters by color with the defined level of tolerance. This greatly helps to reduce the amount of HTML elements required to render the text, which in turn improves performance.
 
-- Lower the max framerate. Having an unnecessarily high framerate when converting with videos or any dynamic media is heavy on performances. Prioritise a smaller, but consistent framerate, rather than a higher but unreachable framerate.
+- Lower the max framerate. Having an unnecessarily high framerate when converting videos or any dynamic media is heavy on performances. Prioritise a smaller, but consistent framerate, rather than a higher but unreachable framerate.
 
 - Make the pixel grouping size higher. This can help a bit with improving performances, but comes at the cost of image precision.
 
