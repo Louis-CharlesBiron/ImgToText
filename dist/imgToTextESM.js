@@ -76,7 +76,7 @@ import{CDEUtils,FPSCounter,CanvasUtils,Color,_HasColor,GridAssets,TypingDevice,M
         else canvas = new OffscreenCanvas(...ImageToTextConverter.DEFAULT_CVS_SIZE)
 
         const CVS = new Canvas(canvas, ()=>{
-            if (this._media?.initialized) this._resultCB(this.#getText(this.#mapPixels()))
+            if (this._media?.initialized) this._resultCB(this.#getText(this.#mapPixels(), this._useColors))
         }, maxRefreshRate, null, null, null, true)
 
         return CVS
@@ -84,13 +84,14 @@ import{CDEUtils,FPSCounter,CanvasUtils,Color,_HasColor,GridAssets,TypingDevice,M
 
     // updates cached characters set range
     #updateCachedRangeDivision() {
-        this.#cachedRangeDivision =  1/(255/this._charSet.length)
+        this.#cachedRangeDivision = 1/(255/this._charSet.length)
     }
 
     // groups the media pixels according to pxGroupingSize and returns the y and the average value of each
-    #mapPixels(pxGroupingSize=this._pxGroupingSize) {
-        let CVS = this._CVS, useColors = this._useColors, media = this._media, mediaSize = media.trueSize, width = mediaSize[0]>CVS.width?CVS.width:(mediaSize[0]>>0), height = mediaSize[0]>CVS.height?CVS.height:(mediaSize[1]>>0), data,
-            x, y, atY, atX, atI, pxGroupingCount = (pxGroupingSize**2)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, bigPixels = [], minDif = CDEUtils.getAcceptableDiff
+    #mapPixels(pxGroupingSize=this._pxGroupingSize, useColors=this._useColors) {
+        let CVS = this._CVS, media = this._media, mediaSize = media.trueSize, width = mediaSize[0]>CVS.width?CVS.width:(mediaSize[0]>>0), height = mediaSize[1]>CVS.height?CVS.height:(mediaSize[1]>>0), data,
+            x, atI, i, adjust, pxGroupingCount = (pxGroupingSize*pxGroupingSize)*4, bigPxCountX = width/pxGroupingSize, bigPxCountY = height/pxGroupingSize, round = Math.round, pxGS4 = bigPxCountX*pxGroupingSize*4, GCCX = bigPxCountY*pxGroupingCount*bigPxCountX, pxLength = width*4*pxGroupingSize,
+            bigPixels = new Uint16Array((Math.ceil(bigPxCountX))*(Math.ceil(bigPxCountY))*(useColors?5:2)), bigPixelsI=0
 
         try {data = CVS.ctx.getImageData(0, 0, width, height).data} catch(e) {
             const src = this._media.source.src
@@ -98,36 +99,36 @@ import{CDEUtils,FPSCounter,CanvasUtils,Color,_HasColor,GridAssets,TypingDevice,M
             data = []
         }
 
-        for (y=0;y<height;y+=pxGroupingSize) {
-            atY = y*pxGroupingSize
+        for (let y=0;y<height;y+=pxGroupingSize) {
+            const offsetY = round((y/height)*GCCX)
             for (x=0;x<width;x+=pxGroupingSize) {
-                atX = x*pxGroupingSize
-                const overflow = width-(x+pxGroupingSize), bigPx = [], offsetX = minDif((((atX/pxGroupingSize)/width)*bigPxCountX)*pxGroupingSize*4, 0.000001), offsetY = minDif((((atY/pxGroupingSize)/height)*bigPxCountY)*pxGroupingCount*bigPxCountX, 0.000001)
+                let offsetX = round((x/width)*pxGS4), pxTotal = 0, total=0, nullCount=0, totalR=0, totalG=0, totalB=0
                 
-                for (let i=0,adjust=0;i<pxGroupingCount;i+=4) {
-                    if (!((i/4)%pxGroupingSize)&&i) adjust = (width*4)*((i/pxGroupingCount)*pxGroupingSize)-i
+                for (i=0,adjust=0;i<pxGroupingCount;i+=4) {
+                    const i2 = (i>>2)%pxGroupingSize
+                    if (i&&!i2) adjust = pxLength*(i/pxGroupingCount)-i
                     atI = offsetX+offsetY+i+adjust
 
-                    const r = data[atI], g = data[atI+1], b = data[atI+2]
-                    bigPx.push((!data[atI+3] || r==null || g==null || b==null || (i/4)%(pxGroupingSize) >= pxGroupingSize+overflow) ? null : useColors?[r,g,b]:(r+g+b)/3)
-                }
-
-                let b_ll = bigPx.length, total=0, nullCount=0, totalR=0, totalG=0, totalB=0
-                for (let i=0;i<b_ll;i++) {
-                    let pxAvg = bigPx[i]
+                    if (!data[atI+3]) continue;
+                    const r = data[atI], g = data[atI+1], b = data[atI+2], pxAvg = (r==null || x+i2 >= width) ? null : (r+g+b)/3
                     if (pxAvg==null) nullCount++
                     else if (useColors) {
-                        const r = pxAvg[0] , g = pxAvg[1], b = pxAvg[2]
-                        pxAvg = (r+g+b)/3
                         totalR+=r
                         totalB+=b
                         totalG+=g
                     }
                     total+=pxAvg
+                    pxTotal++
                 }
 
-                const adjustedCount = (b_ll-nullCount)||0
-                bigPixels.push(useColors ? [y, total/adjustedCount, (totalR/adjustedCount)>>0, (totalG/adjustedCount)>>0, (totalB/adjustedCount)>>0] : [y, total/adjustedCount])
+                const adjustedCount = (pxTotal-nullCount)||0
+                bigPixels[bigPixelsI++] = y
+                bigPixels[bigPixelsI++] = total/adjustedCount
+                if (useColors) {
+                    bigPixels[bigPixelsI++] = totalR/adjustedCount
+                    bigPixels[bigPixelsI++] = totalG/adjustedCount
+                    bigPixels[bigPixelsI++] = totalB/adjustedCount
+                }
             }
         }
 
@@ -135,11 +136,11 @@ import{CDEUtils,FPSCounter,CanvasUtils,Color,_HasColor,GridAssets,TypingDevice,M
     }
 
     // converts the results of mapPixels() to characters based on the current charSet
-    #getText(pixelMappingResults) {
-        let rangeDivision = this.#cachedRangeDivision, useColors = this._useColors, tolerance = this._colorOptimizationLevel, isColorOptimized = useColors&&tolerance, chars = this._charSet, p_ll = pixelMappingResults.length, textResults = "", lastY = 0, streaks, s_ll = 0
+    #getText(pixelMappingResults, useColors) {
+        let rangeDivision = this.#cachedRangeDivision, tolerance = this._colorOptimizationLevel, isColorOptimized = useColors&&tolerance, chars = this._charSet, p_ll = pixelMappingResults.length, step = useColors?5:2, textResults = "", lastY = 0, streaks, s_ll = 0
 
-        for (let i=0;i<p_ll;i++) {
-            const bigPx = pixelMappingResults[i], y = bigPx[0], char = chars[Math.min(((bigPx[1]||0)*rangeDivision)|0, chars.length-1)], r = bigPx[2], g = bigPx[3], b = bigPx[4]
+        for (let i=0;i<p_ll;i+=step) {
+            const y = pixelMappingResults[i], char = chars[Math.min(((pixelMappingResults[i+1]||0)*rangeDivision)|0, chars.length-1)], r = pixelMappingResults[i+2], g = pixelMappingResults[i+3], b = pixelMappingResults[i+4]
 
             if (isColorOptimized) {
                 if (!i) streaks = [[char, r, g, b]]
@@ -175,10 +176,10 @@ import{CDEUtils,FPSCounter,CanvasUtils,Color,_HasColor,GridAssets,TypingDevice,M
      * @param {Function?} errorCB: Function called upon any error loading the media
      * @param {Function?} readyCB: Function called when the media is loaded
      */
-    loadMedia(sourceMedia, size=[...ImageToTextConverter.DEFAULT_MEDIA_SIZE], croppingPositions=null, errorCB=ImageToTextConverter.DEFAULT_MEDIA_ERROR_CALLBACK, readyCB=null) {
+    loadMedia(sourceMedia, size=null, croppingPositions=null, errorCB=ImageToTextConverter.DEFAULT_MEDIA_ERROR_CALLBACK, readyCB=null) {
         this.clear()
 
-        this._media = new ImageDisplay(sourceMedia, [0,0], size, errorCB, (img)=>{
+        this._media = new ImageDisplay(sourceMedia, [0,0], size||[...ImageToTextConverter.DEFAULT_MEDIA_SIZE], errorCB, (img)=>{
             if (img.isDynamic) this._CVS.start()
             else {
                 this._CVS.stop()
@@ -221,10 +222,11 @@ import{CDEUtils,FPSCounter,CanvasUtils,Color,_HasColor,GridAssets,TypingDevice,M
     /**
      * Creates a HTML file input according to this program's restrictions and automatically loads received medias
      * @param {Number? | HTMLInputElement?} id: Either the id of the newly created input or an existing input to append the features to 
+     * @param {[width, height]} size: The size of the new media
      * @param {Function?} onInputCB: Custom callback called on input
      * @returns the created HTML input
      */
-    createHTMLFileInput(id=null, onInputCB=null) {
+    createHTMLFileInput(id=null, size=null, onInputCB=null) {
         const usesOldInput = id instanceof HTMLInputElement, input = usesOldInput ? id : document.createElement("input")
         input.type = "file"
         if (id && !usesOldInput) input.id = id
@@ -236,7 +238,7 @@ import{CDEUtils,FPSCounter,CanvasUtils,Color,_HasColor,GridAssets,TypingDevice,M
                 if (ImageDisplay.isVideoFormatSupported(file)) this.loadMedia(ImageDisplay.loadVideo(file))
                 else if (ImageDisplay.isImageFormatSupported(file)) {
                     const fileReader = new FileReader()
-                    fileReader.onload=e=>this.loadMedia(ImageDisplay.loadImage(e.target.result, null, true))
+                    fileReader.onload=e=>this.loadMedia(ImageDisplay.loadImage(e.target.result, size, true))
                     fileReader.readAsDataURL(file)
                 }
             }

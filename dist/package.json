@@ -52,6 +52,6 @@
         "javascript"
     ],
     "dependencies": {
-        "cdejs": "^1.1.8"
+        "cdejs": "^1.2.0"
     }
 }
