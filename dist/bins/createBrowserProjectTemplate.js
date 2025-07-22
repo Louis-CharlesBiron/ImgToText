@@ -6,13 +6,11 @@ import {createInterface} from "readline"
 import {exec} from "child_process"
 
 const destination = join(process.cwd(), process.argv[2]||""),
-      mediaDest = join(destination, "medias"),
       libPath = join(dirname(fileURLToPath(import.meta.url)), "../imgToText.min.js")
 
 // Create folders
 try {
     mkdirSync(destination, {recursive:true})
-    mkdirSync(mediaDest)
 } catch {}
 
 // Create imgToText.min.js
@@ -32,9 +30,9 @@ writeFileSync(join(destination, "index.html"), `<!DOCTYPE html>
     <div id="generatedText" autocomplete="off" spellcheck="false"></div>
 
     <div class="settings">
+        <label>Use colors:<input id="useColors" type="checkbox"></input></label>
         <button id="copyResult">Copy Text Result</button>
         <button id="inputCamera">Camera</button>
-        <button id="inputScreen">Screen</button>
         <input type="file" id="mediaInput">
     </div>
 
@@ -46,7 +44,7 @@ writeFileSync(join(destination, "index.html"), `<!DOCTYPE html>
 // Create index.css
 writeFileSync(join(destination, "index.css"), `html, body {
     background-color: black;
-    overflow: hidden;
+    overflow: overlay;
     color: aliceblue;
     margin: 0;
     font-size: 16px;
@@ -69,17 +67,25 @@ writeFileSync(join(destination, "index.css"), `html, body {
     letter-spacing: 0px;
     line-height: 18px;
     white-space: pre;
+}
+
+.settings {
+    position: fixed;
+    bottom: 1%;
 }`)
 
 // Create index.js
 writeFileSync(join(destination, "index.js"), `const {ImageToTextConverter} = window.ImgToText, 
       {ImageDisplay} = window.CDE
 
-// The ImageToTextConverter instance
-const converter = new ImageToTextConverter((text)=>{ generatedText.value = text }, null, null, 3)
+// Warning message
+if (location.origin.startsWith("http:")) console.warn("Make sure that this page is hosted on a trusted source (https:// or file://) for the camera and text copy to work!")
+
+// ImageToTextConverter instance
+const converter = new ImageToTextConverter((text)=>{generatedText.innerHTML = text}, null, 5)
 
 // Some default text
-converter.createBigText("Img\\nTo\\nText :D", "32px monospace", [2, 1.25])
+converter.createBigText("Img\nTo\nText :D", "32px monospace", [2, 1.25], "#b0daff")
 
 // Custom file input
 converter.createHTMLFileInput(mediaInput)
@@ -88,6 +94,11 @@ converter.createHTMLFileInput(mediaInput)
 inputCamera.onclick=()=>{
     converter.loadMedia(ImageDisplay.loadCamera())
     mediaInput.value = ""
+}
+
+useColors.oninput=(e)=>{
+    converter.useColors = e.target.checked
+    converter.generate()
 }
 
 // Copy text result
