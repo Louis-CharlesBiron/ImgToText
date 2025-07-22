@@ -71,7 +71,7 @@ writeFileSync(join(destination, "index.css"), `html, body {
 
 .settings {
     position: fixed;
-    bottom: 1%;
+    bottom: 3vh;
 }`)
 
 // Create index.js
@@ -82,10 +82,10 @@ writeFileSync(join(destination, "index.js"), `const {ImageToTextConverter} = win
 if (location.origin.startsWith("http:")) console.warn("Make sure that this page is hosted on a trusted source (https:// or file://) for the camera and text copy to work!")
 
 // ImageToTextConverter instance
-const converter = new ImageToTextConverter((text)=>{generatedText.innerHTML = text}, null, 5)
+const converter = new ImageToTextConverter((text)=>{generatedText.innerHTML = text}, null, 3, [" ",".",":","-","~","=","+","o","O","X","H","M"])
 
 // Some default text
-converter.createBigText("Img\\nTo\\nText :D", "32px monospace", [2, 1.25], "#b0daff")
+converter.createBigText("Img\\nTo\\nText :D", "32px monospace", [2, 1.25], "aqua")
 
 // Custom file input
 converter.createHTMLFileInput(mediaInput)

@@ -1,6 +1,6 @@
 {
     "name": "imgtotext",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "description": "ImgToText is a concise library that converts any image/video into customizable text!",
     "author": {
         "name": "Louis-Charles Biron",
