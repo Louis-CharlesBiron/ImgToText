@@ -85,7 +85,7 @@ if (location.origin.startsWith("http:")) console.warn("Make sure that this page 
 const converter = new ImageToTextConverter((text)=>{generatedText.innerHTML = text}, null, 5)
 
 // Some default text
-converter.createBigText("Img\nTo\nText :D", "32px monospace", [2, 1.25], "#b0daff")
+converter.createBigText("Img\\nTo\\nText :D", "32px monospace", [2, 1.25], "#b0daff")
 
 // Custom file input
 converter.createHTMLFileInput(mediaInput)
